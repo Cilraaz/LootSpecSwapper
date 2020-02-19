@@ -1,1 +1,2 @@
 package-as: LootSpecSwapper
+enable-nolib-creation: no
