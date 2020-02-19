@@ -1,7 +1,0 @@
-## Interface: 80300
-## Title: AutoLootSpecSwap2
-## Notes: A continuation of AutoLootSpecSwap, which appears to be abandoned since 7.2.5
-## Author: Cilraaz
-## SavedVariablesPerCharacter: AutoLootSpecSwap_bossNameToSpecMapping,AutoLootSpecSwap_bossNameToSpecMapping_H,AutoLootSpecSwap_bossNameToSpecMapping_N,AutoLootSpecSwap_bossNameToSpecMapping_L,AutoLootSpecSwap_specToSwitchToAfterLooting,AutoLootSpecSwap_globalSilence,AutoLootSpecSwap_minimized,AutoLootSpecSwap_perDifficulty
-
-AutoLootSpecSwap.lua
