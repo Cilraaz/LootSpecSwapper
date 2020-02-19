@@ -23,7 +23,7 @@ local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameI
 local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSDefaultButton",UIParent,"UIPanelButtonTemplate")
 local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSRestoreButton",UIParent,"UIPanelButtonTemplate")
 local f = CreateFrame("frame")
-local frl = CreateFrame("frame", nil, f)
+--local frl = CreateFrame("frame", nil, f)
 local currPlayerSpecTable = {}
 local maxSpecs = GetNumSpecializations()
 local _,_,classID = UnitClass("player")
@@ -200,11 +200,7 @@ function alssFrame.SlashCommandHandler(cmd)
   elseif cmd and string.lower(cmd) == "diff" then
     AutoLootSpecSwap_perDifficulty = not AutoLootSpecSwap_perDifficulty
     print("Store per difficulty-level: " .. (AutoLootSpecSwap_perDifficulty and "true" or "false"))
-  elseif cmd and string.lower(cmd) == "lootmethod" then
-    AutoLootSpecSwap_raidLeaderFeatures = not AutoLootSpecSwap_raidLeaderFeatures
-    frl:SetShown(AutoLootSpecSwap_raidLeaderFeatures)
-    print("AutoLootSpecSwap: Loot method option " .. ((AutoLootSpecSwap_raidLeaderFeatures) and "Enabled." or "Disabled."))
-  elseif cmd and string.lower(cmd) == "onff" then
+  elseif cmd and string.lower(cmd) == "onoff" then
     globalDisable = not globalDisable
     f:SetShown(not globalDisable)
     print("AutoLootSpecSwap: " .. ((not globalDisable) and "Enabled." or "Disabled."))
@@ -212,7 +208,7 @@ function alssFrame.SlashCommandHandler(cmd)
     AutoLootSpecSwap_globalSilence = not AutoLootSpecSwap_globalSilence
     print("AutoLootSpecSwap: Unsilenced")
   else
-    print("AutoLootSpecSwap: Usage:\n/alss record | setdefault | setdefaulttofollow | list | forget | forgetdefault | quiet | onff")
+    print("AutoLootSpecSwap: Usage:\n/alss record | setdefault | setdefaulttofollow | list | forget | forgetdefault | quiet | onoff")
   end
 end
 
@@ -291,7 +287,7 @@ f:SetScript("OnDragStop", function (self) self:StopMovingOrSizing() end)
 f:SetWidth(220)
 f:SetHeight(260)
 
-frl:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",tile = true, tileSize = 32, edgeSize = 32,insets = { left = 11, right = 12, top = 12, bottom = 11 }})
+--[[frl:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",tile = true, tileSize = 32, edgeSize = 32,insets = { left = 11, right = 12, top = 12, bottom = 11 }})
 frl:SetBackdropColor(0,0,0,1)
 frl:SetFrameStrata("HIGH")
 frl:SetToplevel(true)
@@ -300,7 +296,7 @@ frl:SetMovable(true)
 frl:SetWidth(220)
 frl:SetHeight(100)
 frl:ClearAllPoints()
-frl:SetPoint("TOP", 0, -258)
+frl:SetPoint("TOP", 0, -258)]]
 
 local ttl = CreateFrame("frame", nil, f)
 ttl:SetWidth(185)
@@ -388,7 +384,6 @@ end
 
 journalSaveButton:SetScript("OnUpdate",function(self)
   if(self:IsVisible()) then
-    frl:SetShown(AutoLootSpecSwap_raidLeaderFeatures)
     local bossName = EncounterJournalEncounterFrameInfoCreatureButton1.name
     local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
 
