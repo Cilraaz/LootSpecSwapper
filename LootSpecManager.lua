@@ -1,27 +1,31 @@
 local lsmFrame = CreateFrame("frame")
 
-LootSpecManager_bossNameToSpecMapping = {}
-LootSpecManager_bossNameToSpecMapping_H = {}
-LootSpecManager_bossNameToSpecMapping_N = {}
-LootSpecManager_bossNameToSpecMapping_L = {}
-LootSpecManager_perDifficulty = false
-LootSpecManager_specToSwitchToAfterLooting = 0
-LootSpecManager_globalSilence = false
-LootSpecManager_minimized = false
+if type(LSMDB) ~= "table" then
+  LSMDB = {};
+end
+
+LSMDB.bossNameToSpecMapping = {}
+LSMDB.bossNameToSpecMapping_H = {}
+LSMDB.bossNameToSpecMapping_N = {}
+LSMDB.bossNameToSpecMapping_L = {}
+LSMDB.perDifficulty = false
+LSMDB.specToSwitchToAfterLooting = 0
+LSMDB.globalSilence = false
+LSMDB.minimized = false
 
 local perDiffIDToVarMap = {
-  [14] = "LootSpecManager_bossNameToSpecMapping_N",
-  [15] = "LootSpecManager_bossNameToSpecMapping_H",
-  [17] = "LootSpecManager_bossNameToSpecMapping_L",
-  [1] = "LootSpecManager_bossNameToSpecMapping_N",
-  [2] = "LootSpecManager_bossNameToSpecMapping_H"
+  [14] = "LSMDB.bossNameToSpecMapping_N",
+  [15] = "LSMDB.bossNameToSpecMapping_H",
+  [17] = "LSMDB.bossNameToSpecMapping_L",
+  [1] = "LSMDB.bossNameToSpecMapping_N",
+  [2] = "LSMDB.bossNameToSpecMapping_H"
 }
 
 local autoSwapActive = false
 local globalDisable = false
-local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSSaveButton",UIParent,"UIPanelButtonTemplate")
-local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSDefaultButton",UIParent,"UIPanelButtonTemplate")
-local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSRestoreButton",UIParent,"UIPanelButtonTemplate")
+local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSMSaveButton",UIParent,"UIPanelButtonTemplate")
+local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSMDefaultButton",UIParent,"UIPanelButtonTemplate")
+local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSMRestoreButton",UIParent,"UIPanelButtonTemplate")
 local f = CreateFrame("frame")
 local currPlayerSpecTable = {}
 local maxSpecs = GetNumSpecializations()
@@ -35,7 +39,7 @@ local UnitName = _G["UnitName"]
 local UnitIsDead = _G["UnitIsDead"]
 
 local print = function(msg)
-  if(not LootSpecManager_globalSilence) then
+  if(not LSMDB.globalSilence) then
     origprint(msg)
   end
 end
@@ -65,11 +69,11 @@ lsmFrame:SetScript("OnEvent", function(self, event)
       local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
       local targetName = UnitName("target")
       if not targetName then return end
-      newSpec = LootSpecManager_bossNameToSpecMapping[targetName..currMapID]
+      newSpec = LSMDB.bossNameToSpecMapping[targetName..currMapID]
       if not newSpec then
-        newSpec = LootSpecManager_bossNameToSpecMapping[targetName]
+        newSpec = LSMDB.bossNameToSpecMapping[targetName]
       end
-      if LootSpecManager_perDifficulty then
+      if LSMDB.perDifficulty then
         local _,_,diff = GetInstanceInfo()
         if perDiffIDToVarMap[diff] then
           newSpec = (_G[perDiffIDToVarMap[diff]])[targetName..currMapID]
@@ -85,15 +89,15 @@ lsmFrame:SetScript("OnEvent", function(self, event)
     end
   elseif(autoSwapActive and (not (inDefaultSpecAlready--[[ or InCombatLockdown()]]))) then
     autoSwapActive = false
-    if(LootSpecManager_specToSwitchToAfterLooting ~= 0) then
+    if(LSMDB.specToSwitchToAfterLooting ~= 0) then
       if (GroupLootContainer and GroupLootContainer:IsVisible()) then
-        lsmFrame.onBonusWindowClosedSpec = LootSpecManager_specToSwitchToAfterLooting
+        lsmFrame.onBonusWindowClosedSpec = LSMDB.specToSwitchToAfterLooting
         hooksecurefunc("BonusRollFrame_OnHide", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_CloseBonusRoll", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_FinishedFading", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_AdvanceLootSpinnerAnim", BonusWindowClosed)
       else
-        newSpec = LootSpecManager_specToSwitchToAfterLooting
+        newSpec = LSMDB.specToSwitchToAfterLooting
       end
       inDefaultSpecAlready = true
     end
@@ -120,21 +124,21 @@ function lsmFrame.SlashCommandHandler(cmd)
       if(currSpec == 0) then
         origprint("LootSpecManager: You must set a spec first (right-click your character frame).")
       else
-        if LootSpecManager_perDifficulty then
+        if LSMDB.perDifficulty then
           local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
           if diff then
             if diff:match(PLAYER_DIFFICULTY1) then
-              LootSpecManager_bossNameToSpecMapping_N[currTarget] = currSpec
+              LSMDB.bossNameToSpecMapping_N[currTarget] = currSpec
             elseif diff:match(PLAYER_DIFFICULTY2) then
-              LootSpecManager_bossNameToSpecMapping_H[currTarget] = currSpec
+              LSMDB.bossNameToSpecMapping_H[currTarget] = currSpec
             elseif diff:match(PLAYER_DIFFICULTY3) then
-              LootSpecManager_bossNameToSpecMapping_L[currTarget] = currSpec
+              LSMDB.bossNameToSpecMapping_L[currTarget] = currSpec
             else
-              LootSpecManager_bossNameToSpecMapping[currTarget] = currSpec
+              LSMDB.bossNameToSpecMapping[currTarget] = currSpec
             end
           end
         else
-          LootSpecManager_bossNameToSpecMapping[currTarget] = currSpec
+          LSMDB.bossNameToSpecMapping[currTarget] = currSpec
         end
       end
     end
@@ -142,78 +146,78 @@ function lsmFrame.SlashCommandHandler(cmd)
     local currSpec = (GetLootSpecialization())
     if(type(currSpec) == "number") then
       if(currSpec == 0) then
-        LootSpecManager_specToSwitchToAfterLooting = -1
+        LSMDB.specToSwitchToAfterLooting = -1
       else
-        LootSpecManager_specToSwitchToAfterLooting = currSpec
+        LSMDB.specToSwitchToAfterLooting = currSpec
       end
     end
   elseif cmd and string.lower(cmd) == "setdefaulttofollow" then
-    LootSpecManager_specToSwitchToAfterLooting = -1
+    LSMDB.specToSwitchToAfterLooting = -1
     print("LootSpecManager: Set default spec to follow your actual spec.")
   elseif cmd and string.lower(cmd) == "list" then
     print("LootSpecManager: List")
-    for k,v in pairs(LootSpecManager_bossNameToSpecMapping) do
+    for k,v in pairs(LSMDB.bossNameToSpecMapping) do
       if(type(v) == "number" and type(k) == "string") then
         print(k..": "..(select(2,GetSpecializationInfoByID(v))))
       end
     end
-    if(LootSpecManager_specToSwitchToAfterLooting) then
-      if(LootSpecManager_specToSwitchToAfterLooting == 0) then
+    if(LSMDB.specToSwitchToAfterLooting) then
+      if(LSMDB.specToSwitchToAfterLooting == 0) then
         print("Default: <<No default>>")
-      elseif(LootSpecManager_specToSwitchToAfterLooting == -1) then
+      elseif(LSMDB.specToSwitchToAfterLooting == -1) then
         print("Default: <<Current Spec>>")
       else
-        print("Default: "..(select(2,GetSpecializationInfoByID(LootSpecManager_specToSwitchToAfterLooting))))
+        print("Default: "..(select(2,GetSpecializationInfoByID(LSMDB.specToSwitchToAfterLooting))))
       end
     end
   elseif cmd and string.lower(cmd) == "forget" then
     local currTarget = overrideTarget or UnitName("target")
     if(type(currTarget) == "string") then
       local noInstanceTarget = (currTarget:gsub("%d+$","")) or ""
-      if LootSpecManager_perDifficulty then
+      if LSMDB.perDifficulty then
         local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
         if diff then
           if diff:match(PLAYER_DIFFICULTY1) then
-            LootSpecManager_bossNameToSpecMapping_N[currTarget] = nil
-            LootSpecManager_bossNameToSpecMapping_N[noInstanceTarget] = nil
+            LSMDB.bossNameToSpecMapping_N[currTarget] = nil
+            LSMDB.bossNameToSpecMapping_N[noInstanceTarget] = nil
           elseif diff:match(PLAYER_DIFFICULTY2) then
-            LootSpecManager_bossNameToSpecMapping_H[currTarget] = nil
-            LootSpecManager_bossNameToSpecMapping_H[noInstanceTarget] = nil
+            LSMDB.bossNameToSpecMapping_H[currTarget] = nil
+            LSMDB.bossNameToSpecMapping_H[noInstanceTarget] = nil
           elseif diff:match(PLAYER_DIFFICULTY3) then
-            LootSpecManager_bossNameToSpecMapping_L[currTarget] = nil
-            LootSpecManager_bossNameToSpecMapping_L[noInstanceTarget] = nil
+            LSMDB.bossNameToSpecMapping_L[currTarget] = nil
+            LSMDB.bossNameToSpecMapping_L[noInstanceTarget] = nil
           else
-            LootSpecManager_bossNameToSpecMapping[currTarget] = nil
-            LootSpecManager_bossNameToSpecMapping[noInstanceTarget] = nil
+            LSMDB.bossNameToSpecMapping[currTarget] = nil
+            LSMDB.bossNameToSpecMapping[noInstanceTarget] = nil
           end
         end
       else
-        LootSpecManager_bossNameToSpecMapping[currTarget] = nil
-        LootSpecManager_bossNameToSpecMapping[noInstanceTarget] = nil
+        LSMDB.bossNameToSpecMapping[currTarget] = nil
+        LSMDB.bossNameToSpecMapping[noInstanceTarget] = nil
       end
     end
   elseif cmd and string.lower(cmd) == "forgetdefault" then
-    LootSpecManager_specToSwitchToAfterLooting = 0
+    LSMDB.specToSwitchToAfterLooting = 0
     print("LootSpecManager: Forgot default spec.")
   elseif cmd and string.lower(cmd) == "diff" then
-    LootSpecManager_perDifficulty = not LootSpecManager_perDifficulty
-    print("Store per difficulty-level: " .. (LootSpecManager_perDifficulty and "true" or "false"))
+    LSMDB.perDifficulty = not LSMDB.perDifficulty
+    print("Store per difficulty-level: " .. (LSMDB.perDifficulty and "true" or "false"))
   elseif cmd and string.lower(cmd) == "onoff" then
     globalDisable = not globalDisable
     f:SetShown(not globalDisable)
     print("LootSpecManager: " .. ((not globalDisable) and "Enabled." or "Disabled."))
   elseif cmd and string.lower(cmd) == "quiet" then
-    LootSpecManager_globalSilence = not LootSpecManager_globalSilence
+    LSMDB.globalSilence = not LSMDB.globalSilence
     print("LootSpecManager: Unsilenced")
   else
-    print("LootSpecManager: Usage:\n/alss record | setdefault | setdefaulttofollow | list | forget | forgetdefault | quiet | onoff")
+    print("LootSpecManager: Usage:\n/lsm record | setdefault | setdefaulttofollow | list | forget | forgetdefault | quiet | onoff")
   end
 end
 
 journalRestoreButton:SetScript("OnClick",function(self)
   f:Show()
   self:Hide()
-  LootSpecManager_minimized = false
+  LSMDB.minimized = false
 end)
 journalSaveButton:SetScript("OnClick",function(self, button)
   local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
@@ -229,16 +233,16 @@ journalSaveButton:SetScript("OnClick",function(self, button)
     overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
     overrideSpec = firstSpec
     local selectedSpec = nil
-    selectedSpec = LootSpecManager_bossNameToSpecMapping[overrideTarget]
-    if LootSpecManager_perDifficulty then
+    selectedSpec = LSMDB.bossNameToSpecMapping[overrideTarget]
+    if LSMDB.perDifficulty then
       local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
       if diff then
         if diff:match(PLAYER_DIFFICULTY1) then
-          selectedSpec = LootSpecManager_bossNameToSpecMapping_N[overrideTarget]
+          selectedSpec = LSMDB.bossNameToSpecMapping_N[overrideTarget]
         elseif diff:match(PLAYER_DIFFICULTY2) then
-          selectedSpec = LootSpecManager_bossNameToSpecMapping_H[overrideTarget]
+          selectedSpec = LSMDB.bossNameToSpecMapping_H[overrideTarget]
         elseif diff:match(PLAYER_DIFFICULTY3) then
-          selectedSpec = LootSpecManager_bossNameToSpecMapping_L[overrideTarget]
+          selectedSpec = LSMDB.bossNameToSpecMapping_L[overrideTarget]
         end
       else
         print("Select a difficulty first.")
@@ -310,7 +314,7 @@ ttlTxt:SetPoint("TOP", 0, 12)
 
 local fClose = CreateFrame("Button", nil, f, "UIPanelCloseButton")
 fClose:SetPoint("TOPRIGHT", 12, 12)
-fClose:SetScript("OnClick", function(self) self:GetParent():Hide(); journalRestoreButton:Show(); LootSpecManager_minimized = true end)
+fClose:SetScript("OnClick", function(self) self:GetParent():Hide(); journalRestoreButton:Show(); LSMDB.minimized = true end)
 fClose:Show()
 
 journalSaveButton:SetParent(f)
@@ -376,16 +380,16 @@ journalSaveButton:SetScript("OnUpdate",function(self)
 
     if(type(bossName) == "string") then
       bossName = bossName .. EJInstanceID
-      local bossSpec = LootSpecManager_bossNameToSpecMapping[bossName]
-      if LootSpecManager_perDifficulty then
+      local bossSpec = LSMDB.bossNameToSpecMapping[bossName]
+      if LSMDB.perDifficulty then
         local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
         if diff and diff ~= "" then
           if diff:match(PLAYER_DIFFICULTY1) then
-            bossSpec = LootSpecManager_bossNameToSpecMapping_N[bossName]
+            bossSpec = LSMDB.bossNameToSpecMapping_N[bossName]
           elseif diff:match(PLAYER_DIFFICULTY2) then
-            bossSpec = LootSpecManager_bossNameToSpecMapping_H[bossName]
+            bossSpec = LSMDB.bossNameToSpecMapping_H[bossName]
           elseif diff:match(PLAYER_DIFFICULTY3) then
-            bossSpec = LootSpecManager_bossNameToSpecMapping_L[bossName]
+            bossSpec = LSMDB.bossNameToSpecMapping_L[bossName]
           end
         end
       end
@@ -393,7 +397,7 @@ journalSaveButton:SetScript("OnUpdate",function(self)
       UpdateSaveButton(bossSpec)
     end
 
-    UpdateDefaultButton(LootSpecManager_specToSwitchToAfterLooting)
+    UpdateDefaultButton(LSMDB.specToSwitchToAfterLooting)
   end
 end)
 
@@ -412,11 +416,11 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     f:SetPoint("TOP",EncounterJournal,"TOP",650,0)
     journalRestoreButton:SetWidth(60)
     journalRestoreButton:SetHeight(14)
-    journalRestoreButton:SetText("ALSS>>")
+    journalRestoreButton:SetText("LSM>>")
     journalRestoreButton:SetParent(EncounterJournal)
     journalRestoreButton:ClearAllPoints()
     journalRestoreButton:SetPoint("TOP",EncounterJournal,"TOP",340,-4)
-    if(LootSpecManager_minimized) then fClose:Click() end
+    if(LSMDB.minimized) then fClose:Click() end
       for i=1,maxSpecs do
         local id, _, _, icon = GetSpecializationInfoForClassID(classID, i)
         currPlayerSpecTable[i] = {id, icon}
