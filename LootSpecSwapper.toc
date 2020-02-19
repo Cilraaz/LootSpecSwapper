@@ -1,10 +1,10 @@
 ## Interface: 80300
 
-## Title: Loot Spec Manager
+## Title: Loot Spec Swapper
 ## Author: Cilraaz
 ## Version: 8.3.0.00
 ## Notes: A continuation of AutoLootSpecSwap, which appears to be abandoned since 7.2.5
 
-## SavedVariablesPerCharacter: LSMDB
+## SavedVariablesPerCharacter: LSSDB
 
-LootSpecManager.lua
+LootSpecSwapper.lua
