@@ -23,7 +23,6 @@ local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameI
 local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSDefaultButton",UIParent,"UIPanelButtonTemplate")
 local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSRestoreButton",UIParent,"UIPanelButtonTemplate")
 local f = CreateFrame("frame")
---local frl = CreateFrame("frame", nil, f)
 local currPlayerSpecTable = {}
 local maxSpecs = GetNumSpecializations()
 local _,_,classID = UnitClass("player")
@@ -62,28 +61,26 @@ alssFrame:SetScript("OnEvent", function(self, event)
   local newSpec = nil
   if(event == "PLAYER_TARGET_CHANGED") then
     if(not UnitIsDead("target")) then
-      --if(UnitIsEnemy("player","target")) then
-        local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
-        local targetName = UnitName("target")
-        if not targetName then return end
-          newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName..currMapID]
+      local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
+      local targetName = UnitName("target")
+      if not targetName then return end
+      newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName..currMapID]
+      if not newSpec then
+        newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName]
+      end
+      if AutoLootSpecSwap_perDifficulty then
+        local _,_,diff = GetInstanceInfo()
+        if perDiffIDToVarMap[diff] then
+          newSpec = (_G[perDiffIDToVarMap[diff]])[targetName..currMapID]
           if not newSpec then
-            newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName]
+            newSpec = (_G[perDiffIDToVarMap[diff]])[targetName]
           end
-          if AutoLootSpecSwap_perDifficulty then
-            local _,_,diff = GetInstanceInfo()
-            if perDiffIDToVarMap[diff] then
-              newSpec = (_G[perDiffIDToVarMap[diff]])[targetName..currMapID]
-              if not newSpec then
-                newSpec = (_G[perDiffIDToVarMap[diff]])[targetName]
-              end
-            end
-          end
-          if(newSpec) then
-            inDefaultSpecAlready = false
-            autoSwapActive = true
-          end
-      --end
+        end
+      end
+      if(newSpec) then
+        inDefaultSpecAlready = false
+        autoSwapActive = true
+      end
     end
   elseif(autoSwapActive and (not (inDefaultSpecAlready--[[ or InCombatLockdown()]]))) then
     autoSwapActive = false
@@ -287,17 +284,6 @@ f:SetScript("OnDragStop", function (self) self:StopMovingOrSizing() end)
 f:SetWidth(220)
 f:SetHeight(260)
 
---[[frl:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",tile = true, tileSize = 32, edgeSize = 32,insets = { left = 11, right = 12, top = 12, bottom = 11 }})
-frl:SetBackdropColor(0,0,0,1)
-frl:SetFrameStrata("HIGH")
-frl:SetToplevel(true)
-frl:EnableMouse(true)
-frl:SetMovable(true)
-frl:SetWidth(220)
-frl:SetHeight(100)
-frl:ClearAllPoints()
-frl:SetPoint("TOP", 0, -258)]]
-
 local ttl = CreateFrame("frame", nil, f)
 ttl:SetWidth(185)
 ttl:SetHeight(40)
@@ -445,5 +431,4 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
         lastSpec = id
       end
     end
-    --self:UnregisterAllEvents()
 end)
