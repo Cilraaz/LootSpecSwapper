@@ -1,7 +1,10 @@
 ## Interface: 80300
+
 ## Title: Loot Spec Manager
-## Notes: A continuation of AutoLootSpecSwap, which appears to be abandoned since 7.2.5
 ## Author: Cilraaz
+## Version: 8.3.0.00
+## Notes: A continuation of AutoLootSpecSwap, which appears to be abandoned since 7.2.5
+
 ## SavedVariablesPerCharacter: LootSpecManager_bossNameToSpecMapping,LootSpecManager_bossNameToSpecMapping_H,LootSpecManager_bossNameToSpecMapping_N,LootSpecManager_bossNameToSpecMapping_L,LootSpecManager_specToSwitchToAfterLooting,LootSpecManager_globalSilence,LootSpecManager_minimized,LootSpecManager_perDifficulty
 
 LootSpecManager.lua
