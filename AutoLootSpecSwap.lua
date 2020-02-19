@@ -1,15 +1,10 @@
-local me = CreateFrame("frame")
+local alssFrame = CreateFrame("frame")
 
 AutoLootSpecSwap_bossNameToSpecMapping = {}
 AutoLootSpecSwap_bossNameToSpecMapping_H = {}
 AutoLootSpecSwap_bossNameToSpecMapping_N = {}
 AutoLootSpecSwap_bossNameToSpecMapping_L = {}
-AutoLootSpecSwap_bossNameToRMMapping = {}
-AutoLootSpecSwap_bossNameToRMMapping_H = {}
-AutoLootSpecSwap_bossNameToRMMapping_N = {}
-AutoLootSpecSwap_bossNameToRMMapping_L = {}
 AutoLootSpecSwap_perDifficulty = false
-AutoLootSpecSwap_raidLeaderFeatures = false
 AutoLootSpecSwap_specToSwitchToAfterLooting = 0
 AutoLootSpecSwap_globalSilence = false
 AutoLootSpecSwap_minimized = false
@@ -27,7 +22,6 @@ local globalDisable = false
 local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSSaveButton",UIParent,"UIPanelButtonTemplate")
 local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSDefaultButton",UIParent,"UIPanelButtonTemplate")
 local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSRestoreButton",UIParent,"UIPanelButtonTemplate")
-local journalRLButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1ALSSRLButton",UIParent,"UIPanelButtonTemplate")
 local f = CreateFrame("frame")
 local frl = CreateFrame("frame", nil, f)
 local currPlayerSpecTable = {}
@@ -45,8 +39,8 @@ local print = function(msg)
 end
 
 local function BonusWindowClosed()
-  if ( (me.onBonusWindowClosedSpec) and (me.onBonusWindowClosedSpec) ~= (GetLootSpecialization()) ) then
-    local newSpec = me.onBonusWindowClosedSpec
+  if ( (alssFrame.onBonusWindowClosedSpec) and (alssFrame.onBonusWindowClosedSpec) ~= (GetLootSpecialization()) ) then
+    local newSpec = alssFrame.onBonusWindowClosedSpec
     if(newSpec == -1) then
       SetLootSpecialization(0)
       print("AutoLootSpecSwap: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
@@ -56,25 +50,23 @@ local function BonusWindowClosed()
     end
   end
 
-  me.onBonusWindowClosedSpec = nil
+  alssFrame.onBonusWindowClosedSpec = nil
 end
 
-me:RegisterEvent("PLAYER_TARGET_CHANGED")
-me:RegisterEvent("LOOT_CLOSED")
+alssFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+alssFrame:RegisterEvent("LOOT_CLOSED")
 local UnitName = _G["UnitName"]
 local UnitIsDead = _G["UnitIsDead"]
-me:SetScript("OnEvent", function(self, event)
+alssFrame:SetScript("OnEvent", function(self, event)
   if(globalDisable) then return end
   local newSpec = nil
-  local newRM = nil
   if(event == "PLAYER_TARGET_CHANGED") then
     if(not UnitIsDead("target")) then
       --if(UnitIsEnemy("player","target")) then
-        local currMapID = (GetCurrentMapAreaID()) or 0
+        local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
         local targetName = UnitName("target")
         if not targetName then return end
           newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName..currMapID]
-          newRM = AutoLootSpecSwap_bossNameToRMMapping[targetName..currMapID]
           if not newSpec then
             newSpec = AutoLootSpecSwap_bossNameToSpecMapping[targetName]
           end
@@ -82,11 +74,6 @@ me:SetScript("OnEvent", function(self, event)
             local _,_,diff = GetInstanceInfo()
             if perDiffIDToVarMap[diff] then
               newSpec = (_G[perDiffIDToVarMap[diff]])[targetName..currMapID]
-              if(AutoLootSpecSwap_raidLeaderFeatures) then
-                newRM = (_G[(perDiffIDToVarMap[diff]):gsub("Spec","RM")])[targetName..currMapID]
-                print ((_G[(perDiffIDToVarMap[diff]):gsub("Spec","RM")])[targetName..currMapID])
-                print ((perDiffIDToVarMap[diff]):gsub("Spec","RM"))
-              end
               if not newSpec then
                 newSpec = (_G[perDiffIDToVarMap[diff]])[targetName]
               end
@@ -102,7 +89,7 @@ me:SetScript("OnEvent", function(self, event)
     autoSwapActive = false
     if(AutoLootSpecSwap_specToSwitchToAfterLooting ~= 0) then
       if (GroupLootContainer and GroupLootContainer:IsVisible()) then
-        me.onBonusWindowClosedSpec = AutoLootSpecSwap_specToSwitchToAfterLooting
+        alssFrame.onBonusWindowClosedSpec = AutoLootSpecSwap_specToSwitchToAfterLooting
         hooksecurefunc("BonusRollFrame_OnHide", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_CloseBonusRoll", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_FinishedFading", BonusWindowClosed)
@@ -122,15 +109,11 @@ me:SetScript("OnEvent", function(self, event)
       print("AutoLootSpecSwap: CHANGED LOOT SPEC TO: <<"..(select(2,GetSpecializationInfoByID(newSpec)))..">>")
     end
   end
-  if(AutoLootSpecSwap_raidLeaderFeatures and newRM and (GetLootMethod() ~= newRM) and (UnitIsGroupLeader("player")) and (not InCombatLockdown())) then
-    SetLootMethod(newRM)
-    print("AutoLootSpecSwap: CHANGED LOOT METHOD TO: <<"..newRM..">>")
-  end
 end)
 
 local overrideTarget = nil
 local overrideSpec = nil
-function me.SlashCommandHandler(cmd)
+function alssFrame.SlashCommandHandler(cmd)
   if cmd and string.lower(cmd) == "record" then
     local currSpec = overrideSpec or (GetLootSpecialization())
     local currTarget = overrideTarget or UnitName("target")
@@ -155,28 +138,6 @@ function me.SlashCommandHandler(cmd)
         else
           AutoLootSpecSwap_bossNameToSpecMapping[currTarget] = currSpec
         end
-      end
-    end
-  elseif cmd and string.lower(cmd) == "recordrlmode" then
-    local currSpec = overrideSpec or (GetLootMethod())
-    local currTarget = overrideTarget or UnitName("target")
-
-    if(type(currSpec) == "string" and type(currTarget) == "string") then
-      if AutoLootSpecSwap_perDifficulty then
-        local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
-        if diff then
-          if diff:match(PLAYER_DIFFICULTY1) then
-            AutoLootSpecSwap_bossNameToRMMapping_N[currTarget] = currSpec
-          elseif diff:match(PLAYER_DIFFICULTY2) then
-            AutoLootSpecSwap_bossNameToRMMapping_H[currTarget] = currSpec
-          elseif diff:match(PLAYER_DIFFICULTY3) then
-            AutoLootSpecSwap_bossNameToRMMapping_L[currTarget] = currSpec
-          else
-            AutoLootSpecSwap_bossNameToRMMapping[currTarget] = currSpec
-          end
-        end
-      else
-        AutoLootSpecSwap_bossNameToRMMapping[currTarget] = currSpec
       end
     end
   elseif cmd and string.lower(cmd) == "setdefault" then
@@ -233,32 +194,6 @@ function me.SlashCommandHandler(cmd)
         AutoLootSpecSwap_bossNameToSpecMapping[noInstanceTarget] = nil
       end
     end
-  elseif cmd and string.lower(cmd) == "forgetrlmode" then
-    local currTarget = overrideTarget or UnitName("target")
-    if(type(currTarget) == "string") then
-      local noInstanceTarget = (currTarget:gsub("%d+$","")) or ""
-      if AutoLootSpecSwap_perDifficulty then
-        local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
-        if diff then
-          if diff:match(PLAYER_DIFFICULTY1) then
-            AutoLootSpecSwap_bossNameToRMMapping_N[currTarget] = nil
-            AutoLootSpecSwap_bossNameToRMMapping_N[noInstanceTarget] = nil
-          elseif diff:match(PLAYER_DIFFICULTY2) then
-            AutoLootSpecSwap_bossNameToRMMapping_H[currTarget] = nil
-            AutoLootSpecSwap_bossNameToRMMapping_H[noInstanceTarget] = nil
-          elseif diff:match(PLAYER_DIFFICULTY3) then
-            AutoLootSpecSwap_bossNameToRMMapping_L[currTarget] = nil
-            AutoLootSpecSwap_bossNameToRMMapping_L[noInstanceTarget] = nil
-          else
-            AutoLootSpecSwap_bossNameToRMMapping[currTarget] = nil
-            AutoLootSpecSwap_bossNameToRMMapping[noInstanceTarget] = nil
-          end
-        end
-      else
-        AutoLootSpecSwap_bossNameToRMMapping[currTarget] = nil
-        AutoLootSpecSwap_bossNameToRMMapping[noInstanceTarget] = nil
-      end
-    end
   elseif cmd and string.lower(cmd) == "forgetdefault" then
     AutoLootSpecSwap_specToSwitchToAfterLooting = 0
     print("AutoLootSpecSwap: Forgot default spec.")
@@ -294,7 +229,7 @@ journalSaveButton:SetScript("OnClick",function(self, button)
   end
   if(button == "RightButton") then
     overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
-    me.SlashCommandHandler("forget")
+    alssFrame.SlashCommandHandler("forget")
     overrideTarget = nil
   else
     overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
@@ -321,40 +256,7 @@ journalSaveButton:SetScript("OnClick",function(self, button)
       overrideSpec = currPlayerSpecTable[nextSpecTable[overrideSpec]][1]
       firstSpec = overrideSpec
     end
-    me.SlashCommandHandler("record")
-    overrideTarget = nil
-    overrideSpec = nil
-  end
-end)
-journalRLButton:SetScript("OnClick",function(self, button)
-  local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
-  if (not EncounterJournalEncounterFrameInfoCreatureButton1) or (not EncounterJournalEncounterFrameInfoCreatureButton1.name) or (not EJInstanceID) then
-    print("Select a boss first.")
-    return
-  end
-  if(button == "RightButton") then
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
-    me.SlashCommandHandler("forgetrlmode")
-    overrideTarget = nil
-  else
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
-    local selectedSpec = AutoLootSpecSwap_bossNameToRMMapping[overrideTarget]
-    if AutoLootSpecSwap_perDifficulty then
-      local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
-      if diff then
-        if diff:match(PLAYER_DIFFICULTY1) then
-          selectedSpec = AutoLootSpecSwap_bossNameToRMMapping_N[overrideTarget]
-        elseif diff:match(PLAYER_DIFFICULTY2) then
-          selectedSpec = AutoLootSpecSwap_bossNameToRMMapping_H[overrideTarget]
-        elseif diff:match(PLAYER_DIFFICULTY3) then
-          selectedSpec = AutoLootSpecSwap_bossNameToRMMapping_L[overrideTarget]
-        end
-      else
-        print("Select a difficulty first.")
-      end
-    end
-    overrideSpec = ((not selectedSpec) or selectedSpec:match("personalloot")) and "master" or "personalloot"
-    me.SlashCommandHandler("recordrlmode")
+    alssFrame.SlashCommandHandler("record")
     overrideTarget = nil
     overrideSpec = nil
   end
@@ -363,13 +265,12 @@ end)
 journalSaveButton:RegisterForClicks("AnyDown")
 journalDefaultButton:SetScript("OnClick",function(self, button)
   if(button == "RightButton") then
-    me.SlashCommandHandler("forgetdefault")
+    alssFrame.SlashCommandHandler("forgetdefault")
   else
-    me.SlashCommandHandler("setdefault")
+    alssFrame.SlashCommandHandler("setdefault")
   end
 end)
 journalDefaultButton:RegisterForClicks("AnyDown")
-journalRLButton:RegisterForClicks("AnyDown")
 
 journalSaveButton:SetWidth(80)
 journalSaveButton:SetHeight(80)
@@ -377,9 +278,6 @@ journalSaveButton:SetPoint("CENTER",0,400)
 journalDefaultButton:SetWidth(80)
 journalDefaultButton:SetHeight(80)
 journalDefaultButton:SetPoint("CENTER",0,400)
-journalRLButton:SetWidth(120)
-journalRLButton:SetHeight(40)
-journalRLButton:SetText("Raid loot mode:\n<No change>")
 
 f:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background",edgeFile = "Interface/DialogFrame/UI-DialogBox-Border",tile = true, tileSize = 32, edgeSize = 32,insets = { left = 11, right = 12, top = 12, bottom = 11 }})
 f:SetBackdropColor(0,0,0,1)
@@ -403,10 +301,6 @@ frl:SetWidth(220)
 frl:SetHeight(100)
 frl:ClearAllPoints()
 frl:SetPoint("TOP", 0, -258)
-
-journalRLButton:SetParent(frl)
-journalRLButton:ClearAllPoints()
-journalRLButton:SetPoint("CENTER",0,0)
 
 local ttl = CreateFrame("frame", nil, f)
 ttl:SetWidth(185)
@@ -492,14 +386,6 @@ local function UpdateDefaultButton(bossSpec)
   end
 end
 
-local function UpdateRLButton(bossLM)
-  if bossLM then
-    journalRLButton:SetText("Raid loot mode:\n" .. bossLM)
-  else
-    journalRLButton:SetText("Raid loot mode:\n<No change>")
-  end
-end
-
 journalSaveButton:SetScript("OnUpdate",function(self)
   if(self:IsVisible()) then
     frl:SetShown(AutoLootSpecSwap_raidLeaderFeatures)
@@ -509,32 +395,27 @@ journalSaveButton:SetScript("OnUpdate",function(self)
     if(type(bossName) == "string") then
       bossName = bossName .. EJInstanceID
       local bossSpec = AutoLootSpecSwap_bossNameToSpecMapping[bossName]
-      local bossRM = AutoLootSpecSwap_bossNameToRMMapping[bossName]
       if AutoLootSpecSwap_perDifficulty then
         local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
         if diff and diff ~= "" then
           if diff:match(PLAYER_DIFFICULTY1) then
             bossSpec = AutoLootSpecSwap_bossNameToSpecMapping_N[bossName]
-            bossRM = AutoLootSpecSwap_bossNameToRMMapping_N[bossName]
           elseif diff:match(PLAYER_DIFFICULTY2) then
             bossSpec = AutoLootSpecSwap_bossNameToSpecMapping_H[bossName]
-            bossRM = AutoLootSpecSwap_bossNameToRMMapping_H[bossName]
           elseif diff:match(PLAYER_DIFFICULTY3) then
             bossSpec = AutoLootSpecSwap_bossNameToSpecMapping_L[bossName]
-            bossRM = AutoLootSpecSwap_bossNameToRMMapping_L[bossName]
           end
         end
       end
       saveButtonDesc:SetText("Boss: "..bossName.."\nLMB:Toggle, RMB:Clear")
       UpdateSaveButton(bossSpec)
-      UpdateRLButton(bossRM)
     end
 
     UpdateDefaultButton(AutoLootSpecSwap_specToSwitchToAfterLooting)
   end
 end)
 
-SlashCmdList["AUTOLOOTSPECSWAP"] = me.SlashCommandHandler
+SlashCmdList["AUTOLOOTSPECSWAP"] = alssFrame.SlashCommandHandler
 SLASH_AUTOLOOTSPECSWAP1 = "/autolootspecswap"
 SLASH_AUTOLOOTSPECSWAP2 = "/alss"
 
