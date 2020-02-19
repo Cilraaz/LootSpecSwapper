@@ -1,0 +1,12 @@
+## Interface: 80300
+
+## Title: Loot Spec Swapper
+## Author: Cilraaz
+## Version: 8.3.0.00
+## Notes: Automatically change your loot spec on a boss-by-boss basis
+# Comment: This is a continuation of AutoLootSpecSwap, which was abandoned after 7.2.5
+
+## DefaultState: enabled
+## SavedVariablesPerCharacter: LSSDB
+
+LootSpecSwapper.lua
