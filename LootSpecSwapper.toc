@@ -1,8 +1,8 @@
-## Interface: 90001
+## Interface: 90002
 
 ## Title: Loot Spec Swapper
 ## Author: Cilraaz
-## Version: 9.0.1.01
+## Version: v2020.11.20
 ## Notes: Automatically change your loot spec on a boss-by-boss basis
 # Comment: This is a continuation of AutoLootSpecSwap, which was abandoned after 7.2.5
 
