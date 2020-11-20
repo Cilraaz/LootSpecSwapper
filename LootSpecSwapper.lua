@@ -1,10 +1,11 @@
 local lssFrame = CreateFrame("frame")
 
 if type(LSSDB) ~= "table" then
-  LSSDB = {};
+  LSSDB = {}
 end
 
 LSSDB.bossNameToSpecMapping = {}
+LSSDB.bossNameToSpecMapping_M = {}
 LSSDB.bossNameToSpecMapping_H = {}
 LSSDB.bossNameToSpecMapping_N = {}
 LSSDB.bossNameToSpecMapping_L = {}
@@ -14,11 +15,15 @@ LSSDB.globalSilence = false
 LSSDB.minimized = false
 
 local perDiffIDToVarMap = {
+  -- Raids
   [14] = "LSSDB.bossNameToSpecMapping_N",
   [15] = "LSSDB.bossNameToSpecMapping_H",
+  [16] = "LSSDB.bossNameToSpecMapping_M",
   [17] = "LSSDB.bossNameToSpecMapping_L",
+  -- Dungeons
   [1] = "LSSDB.bossNameToSpecMapping_N",
-  [2] = "LSSDB.bossNameToSpecMapping_H"
+  [2] = "LSSDB.bossNameToSpecMapping_H",
+  [23] = "LSSDB.bossNameToSpecMapping_M"
 }
 
 local autoSwapActive = false
@@ -133,6 +138,8 @@ function lssFrame.SlashCommandHandler(cmd)
               LSSDB.bossNameToSpecMapping_H[currTarget] = currSpec
             elseif diff:match(PLAYER_DIFFICULTY3) then
               LSSDB.bossNameToSpecMapping_L[currTarget] = currSpec
+            elseif diff:match(PLAYER_DIFFICULTY6) then
+              LSSDB.bossNameToSpecMapping_M[currTarget] = currSpec
             else
               LSSDB.bossNameToSpecMapping[currTarget] = currSpec
             end
@@ -186,6 +193,9 @@ function lssFrame.SlashCommandHandler(cmd)
           elseif diff:match(PLAYER_DIFFICULTY3) then
             LSSDB.bossNameToSpecMapping_L[currTarget] = nil
             LSSDB.bossNameToSpecMapping_L[noInstanceTarget] = nil
+          elseif diff:match(PLAYER_DIFFICULTY6) then
+            LSSDB.bossNameToSpecMapping_M[currTarget] = nil
+            LSSDB.bossNameToSpecMapping_M[noInstanceTarget] = nil
           else
             LSSDB.bossNameToSpecMapping[currTarget] = nil
             LSSDB.bossNameToSpecMapping[noInstanceTarget] = nil
@@ -211,7 +221,7 @@ function lssFrame.SlashCommandHandler(cmd)
     LSSDB.globalSilence = not LSSDB.globalSilence
     print("Loot Spec Swapper: Unsilenced")
   else
-    origprint("Loot Spec Swapper: Usage:\n/lss onoff | quiet | list | record | forget | setdefault | forgetdefault | setdefaulttofollow")
+    origprint("Loot Spec Swapper: Usage:\n/lss onoff | quiet | list | diff | record | forget | setdefault | forgetdefault | setdefaulttofollow")
   end
 end
 
@@ -244,6 +254,8 @@ journalSaveButton:SetScript("OnClick",function(self, button)
           selectedSpec = LSSDB.bossNameToSpecMapping_H[overrideTarget]
         elseif diff:match(PLAYER_DIFFICULTY3) then
           selectedSpec = LSSDB.bossNameToSpecMapping_L[overrideTarget]
+        elseif diff:match(PLAYER_DIFFICULTY6) then
+          selectedSpec = LSSDB.bossNameToSpecMapping_M[overrideTarget]
         end
       else
         print("Select a difficulty first.")
@@ -386,11 +398,25 @@ journalSaveButton:SetScript("OnUpdate",function(self)
         local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
         if diff and diff ~= "" then
           if diff:match(PLAYER_DIFFICULTY1) then
+            if not LSSDB.bossNameToSpecMapping_N then
+              LSSDB.bossNameToSpecMapping_N = {}
+            end
             bossSpec = LSSDB.bossNameToSpecMapping_N[bossName]
           elseif diff:match(PLAYER_DIFFICULTY2) then
+            if not LSSDB.bossNameToSpecMapping_H then
+              LSSDB.bossNameToSpecMapping_H = {}
+            end
             bossSpec = LSSDB.bossNameToSpecMapping_H[bossName]
           elseif diff:match(PLAYER_DIFFICULTY3) then
+            if not LSSDB.bossNameToSpecMapping_L then
+              LSSDB.bossNameToSpecMapping_L = {}
+            end
             bossSpec = LSSDB.bossNameToSpecMapping_L[bossName]
+          elseif diff:match(PLAYER_DIFFICULTY6) then
+            if not LSSDB.bossNameToSpecMapping_M then
+              LSSDB.bossNameToSpecMapping_M = {}
+            end
+            bossSpec = LSSDB.bossNameToSpecMapping_M[bossName]
           end
         end
       end
