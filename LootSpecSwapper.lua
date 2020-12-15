@@ -41,7 +41,7 @@ local firstSpec
 local print = print
 local UnitName = UnitName
 local UnitIsDead = UnitIsDead
-local debugOn = true
+local debugOn = false
 local EJ_GetDifficulty = EJ_GetDifficulty
 local EJ_GetInstanceInfo = EJ_GetInstanceInfo
 
@@ -84,9 +84,7 @@ lssFrame:SetScript("OnEvent", function(self, event)
       if not targetName then return end
 
       if LSSDB.perDifficulty then
-        debugPrint("perDifficulty is true")
         local _,_,diff = GetInstanceInfo()
-        debugPrint("diff: "..diff)
         if diff then
           newSpec = LSSDB.specPerBoss[diff][currMapID][targetName]
         else
@@ -470,6 +468,7 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
 
     debugPrint("ADDON_LOADED fired. Removing old SavedVariables data, if it exists.")
     -- Remove old SavedVariables data
+    if LSSDB.bossNameToSpecMapping then LSSDB.bossNameToSpecMapping = nil; end
     if LSSDB.bossNameToSpecMapping_L then LSSDB.bossNameToSpecMapping_L = nil; end
     if LSSDB.bossNameToSpecMapping_N then LSSDB.bossNameToSpecMapping_N = nil; end
     if LSSDB.bossNameToSpecMapping_H then LSSDB.bossNameToSpecMapping_H = nil; end
