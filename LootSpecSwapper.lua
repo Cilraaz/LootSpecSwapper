@@ -46,7 +46,7 @@ local EJ_GetDifficulty = EJ_GetDifficulty
 local EJ_GetInstanceInfo = EJ_GetInstanceInfo
 
 local printOutput = function(msg)
-  if(not LSSDB.globalSilence) then
+  if (not LSSDB.globalSilence) then
     print(msg)
   end
 end
@@ -60,7 +60,7 @@ end
 local function BonusWindowClosed()
   if ( (lssFrame.onBonusWindowClosedSpec) and (lssFrame.onBonusWindowClosedSpec) ~= (GetLootSpecialization()) ) then
     local newSpec = lssFrame.onBonusWindowClosedSpec
-    if(newSpec == -1) then
+    if (newSpec == -1) then
       SetLootSpecialization(0)
       printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
     else
@@ -77,8 +77,8 @@ lssFrame:RegisterEvent("LOOT_CLOSED")
 lssFrame:SetScript("OnEvent", function(self, event)
   if (LSSDB.disabled) then return end
   local newSpec = nil
-  if(event == "PLAYER_TARGET_CHANGED") then
-    if(not UnitIsDead("target")) then
+  if (event == "PLAYER_TARGET_CHANGED") then
+    if (not UnitIsDead("target")) then
       local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
       local targetName = UnitName("target")
       if not targetName then return end
@@ -86,23 +86,27 @@ lssFrame:SetScript("OnEvent", function(self, event)
       if LSSDB.perDifficulty then
         local _,_,diff = GetInstanceInfo()
         if diff then
-          newSpec = LSSDB.specPerBoss[diff][currMapID][targetName]
-        else
-          printOutput("LSS: An error has occurred. Spec setting for this boss ("..difficultyNames[tostring(diff)].." difficulty) not found.")
+          if LSSDB.specPerBoss[diff] then
+            if LSSDB.specPerBoss[diff][currMapID] then
+              newSpec = LSSDB.specPerBoss[diff][currMapID][targetName]
+            end
+          end
         end
       else
-        newSpec = LSSDB.specPerBoss.allDifficulties[currMapID][targetName]
+        if LSSDB.specPerBoss.allDifficulties[currMapID] then
+          newSpec = LSSDB.specPerBoss.allDifficulties[currMapID][targetName]
+        end
       end
-      if(newSpec) then
+      if newSpec then
         inDefaultSpecAlready = false
         autoSwapActive = true
       else
-        printOutput("LSS: An error has occurred. Spec setting for this boss (all difficulties) not found.")
+        --printOutput("LSS: An error has occurred. Spec setting for this boss (all difficulties) not found.")
       end
     end
-  elseif(autoSwapActive and (not (inDefaultSpecAlready--[[ or InCombatLockdown()]]))) then
+  elseif (autoSwapActive and (not (inDefaultSpecAlready--[[ or InCombatLockdown()]]))) then
     autoSwapActive = false
-    if(LSSDB.afterLootSpec ~= 0) then
+    if (LSSDB.afterLootSpec ~= 0) then
       if (GroupLootContainer and GroupLootContainer:IsVisible()) then
         lssFrame.onBonusWindowClosedSpec = LSSDB.afterLootSpec
         hooksecurefunc("BonusRollFrame_OnHide", BonusWindowClosed)
@@ -115,8 +119,8 @@ lssFrame:SetScript("OnEvent", function(self, event)
       inDefaultSpecAlready = true
     end
   end
-  if(newSpec and ((GetLootSpecialization()) ~= newSpec)) then
-    if(newSpec == -1) then
+  if (newSpec and ((GetLootSpecialization()) ~= newSpec)) then
+    if (newSpec == -1) then
       SetLootSpecialization(0)
       printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
     else
@@ -133,8 +137,8 @@ function lssFrame.SlashCommandHandler(cmd)
     local currSpec = overrideSpec or (GetLootSpecialization())
     local currTarget = overrideTarget or UnitName("target")
 
-    if(type(currSpec) == "number" and type(currTarget) == "string") then
-      if(currSpec == 0) then
+    if (type(currSpec) == "number" and type(currTarget) == "string") then
+      if (currSpec == 0) then
         printOutput("Loot Spec Swapper: You must set a spec first (right-click your character frame).")
       else
         local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
@@ -150,8 +154,8 @@ function lssFrame.SlashCommandHandler(cmd)
     end
   elseif cmd and string.lower(cmd) == "setdefault" then
     local currSpec = (GetLootSpecialization())
-    if(type(currSpec) == "number") then
-      if(currSpec == 0) then
+    if (type(currSpec) == "number") then
+      if (currSpec == 0) then
         LSSDB.afterLootSpec = -1
       else
         LSSDB.afterLootSpec = currSpec
@@ -182,10 +186,10 @@ function lssFrame.SlashCommandHandler(cmd)
         end
       end
     end
-    if(LSSDB.afterLootSpec) then
-      if(LSSDB.afterLootSpec == 0) then
+    if (LSSDB.afterLootSpec) then
+      if (LSSDB.afterLootSpec == 0) then
         printOutput("Default Spec: <<No default>>")
-      elseif(LSSDB.afterLootSpec == -1) then
+      elseif (LSSDB.afterLootSpec == -1) then
         printOutput("Default Spec: <<Current Spec>>")
       else
         local _, specName = GetSpecializationInfoByID(LSSDB.afterLootSpec)
@@ -194,7 +198,7 @@ function lssFrame.SlashCommandHandler(cmd)
     end
   elseif cmd and string.lower(cmd) == "forget" then
     local currTarget = overrideTarget or UnitName("target")
-    if(type(currTarget) == "string") then
+    if (type(currTarget) == "string") then
       local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
       if LSSDB.perDifficulty then
         local diff = EJ_GetDifficulty()
@@ -244,7 +248,7 @@ journalSaveButton:SetScript("OnClick",function(self, button)
     printOutput("Select a boss first.")
     return
   end
-  if(button == "RightButton") then
+  if (button == "RightButton") then
     overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name
     lssFrame.SlashCommandHandler("forget")
     overrideTarget = nil
@@ -276,7 +280,7 @@ end)
 
 journalSaveButton:RegisterForClicks("AnyDown")
 journalDefaultButton:SetScript("OnClick",function(self, button)
-  if(button == "RightButton") then
+  if (button == "RightButton") then
     lssFrame.SlashCommandHandler("forgetdefault")
   else
     lssFrame.SlashCommandHandler("setdefault")
@@ -358,7 +362,7 @@ defaultButtonDesc:SetPoint("BOTTOM", 0, -48)
 f:Hide()
 
 local function UpdateSaveButton(bossSpec)
-  if(type(bossSpec) == "number") then
+  if (type(bossSpec) == "number") then
     local _, _, _, icon = GetSpecializationInfoByID(bossSpec)
     journalSaveButton:SetNormalTexture(icon)
     journalSaveButton:SetText("")
@@ -369,11 +373,11 @@ local function UpdateSaveButton(bossSpec)
 end
 
 local function UpdateDefaultButton(bossSpec)
-  if(type(bossSpec) == "number") then
-    if(bossSpec == 0) then
+  if (type(bossSpec) == "number") then
+    if (bossSpec == 0) then
       journalDefaultButton:SetNormalTexture(0,0,0,0,1)
       journalDefaultButton:SetText("<none>")
-    elseif(bossSpec == -1) then
+    elseif (bossSpec == -1) then
       journalDefaultButton:SetNormalTexture(0,0,0,0,1)
       journalDefaultButton:SetText("<auto>")
     else
@@ -388,11 +392,11 @@ local function UpdateDefaultButton(bossSpec)
 end
 
 journalSaveButton:SetScript("OnUpdate",function(self)
-  if(self:IsVisible()) then
+  if (self:IsVisible()) then
     local bossName = EncounterJournalEncounterFrameInfoCreatureButton1.name
     local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
 
-    if(type(bossName) == "string") then
+    if (type(bossName) == "string") then
       local bossSpec
       if LSSDB.perDifficulty then
         local diff = EJ_GetDifficulty()
@@ -426,7 +430,7 @@ SLASH_LOOTSPECSWAPPER2 = "/lss"
 local loadframe = CreateFrame("frame")
 loadframe:RegisterEvent("ADDON_LOADED")
 loadframe:SetScript("OnEvent",function(self,event,addon)
-  if(addon == "Blizzard_EncounterJournal") then
+  if (addon == "Blizzard_EncounterJournal") then
     maxSpecs = GetNumSpecializations()
     f:SetParent(EncounterJournal)
     f:Show()
@@ -438,7 +442,7 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     journalRestoreButton:SetParent(EncounterJournal)
     journalRestoreButton:ClearAllPoints()
     journalRestoreButton:SetPoint("TOP",EncounterJournal,"TOP",340,-4)
-    if(LSSDB.minimized) then fClose:Click() end
+    if (LSSDB.minimized) then fClose:Click() end
     for i=1,maxSpecs do
       local id, _, _, icon = GetSpecializationInfoForClassID(classID, i)
       currPlayerSpecTable[i] = {id, icon}
