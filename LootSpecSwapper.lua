@@ -93,7 +93,7 @@ lssFrame:SetScript("OnEvent", function(self, event)
           printOutput("LSS: An error has occurred. Spec setting for this boss ("..difficultyNames[tostring(diff)].." difficulty) not found.")
         end
       else
-        newSpec = LSSDB.specPerBoss["allDifficulties"][currMapID][targetName]
+        newSpec = LSSDB.specPerBoss.allDifficulties[currMapID][targetName]
       end
       if(newSpec) then
         inDefaultSpecAlready = false
@@ -146,7 +146,7 @@ function lssFrame.SlashCommandHandler(cmd)
             LSSDB.specPerBoss[diff][currMapID][currTarget] = currSpec
           end
         else
-          LSSDB.specPerBoss["allDifficulties"][currMapID][currTarget] = currSpec
+          LSSDB.specPerBoss.allDifficulties[currMapID][currTarget] = currSpec
         end
       end
     end
@@ -171,16 +171,16 @@ function lssFrame.SlashCommandHandler(cmd)
           for instance, bossInfo in pairs(v) do
             for boss, spec in pairs(bossInfo) do
               local _, specName = GetSpecializationInfoByID(spec)
-              printOutput("Difficulty: "..difficultyNames[tostring(k)].." - Instance ID: "..instance.." - Boss: "..boss..": "..specName)
+              printOutput("Difficulty: "..difficultyNames[tostring(k)].." - Instance ID: "..instance.." - Boss: "..boss.." - "..specName)
             end
           end
         end
       end
     else
-      for instance, bossInfo in pairs(LSSDB.specPerBoss["allDifficulties"]) do
+      for instance, bossInfo in pairs(LSSDB.specPerBoss.allDifficulties) do
         for boss, spec in pairs(bossInfo) do
           local _, specName = GetSpecializationInfoByID(spec)
-          printOutput("All Difficulties - Instance ID: "..instance.." - Boss: "..boss..": "..specName)
+          printOutput("All Difficulties - Instance ID: "..instance.." - Boss: "..boss.." - "..specName)
         end
       end
     end
@@ -204,7 +204,7 @@ function lssFrame.SlashCommandHandler(cmd)
           LSSDB.specPerBoss[diff][currMapID][currTarget] = nil
         end
       else
-        LSSDB.specPerBoss["allDifficulties"][currMapID][currTarget] = nil
+        LSSDB.specPerBoss.allDifficulties[currMapID][currTarget] = nil
       end
     end
   elseif cmd and string.lower(cmd) == "forgetdefault" then
@@ -262,7 +262,7 @@ journalSaveButton:SetScript("OnClick",function(self, button)
         printOutput("Select a difficulty first.")
       end
     else
-      selectedSpec = LSSDB.specPerBoss["allDifficulties"][EJInstanceID][overrideTarget]
+      selectedSpec = LSSDB.specPerBoss.allDifficulties[EJInstanceID][overrideTarget]
     end
     if selectedSpec then
       overrideSpec = selectedSpec
@@ -408,10 +408,10 @@ journalSaveButton:SetScript("OnUpdate",function(self)
           bossSpec = LSSDB.specPerBoss[diff][EJInstanceID][bossName]
         end
       else
-        if not LSSDB.specPerBoss["allDifficulties"][EJInstanceID] then
-          LSSDB.specPerBoss["allDifficulties"][EJInstanceID] = {}
+        if not LSSDB.specPerBoss.allDifficulties[EJInstanceID] then
+          LSSDB.specPerBoss.allDifficulties[EJInstanceID] = {}
         end
-        bossSpec = LSSDB.specPerBoss["allDifficulties"][EJInstanceID][bossName]
+        bossSpec = LSSDB.specPerBoss.allDifficulties[EJInstanceID][bossName]
       end
       saveButtonDesc:SetText("Boss: "..bossName.."\nLMB:Toggle, RMB:Clear")
       UpdateSaveButton(bossSpec)
@@ -461,7 +461,7 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     debugPrint("ADDON_LOADED fired. Setting defaults.")
     -- Create defaults
     LSSDB.specPerBoss = LSSDB.specPerBoss or {}
-    LSSDB.specPerBoss["allDifficulties"] = LSSDB.specPerBoss["allDifficulties"] or {}
+    LSSDB.specPerBoss.allDifficulties = LSSDB.specPerBoss.allDifficulties or {}
     LSSDB.perDifficulty = LSSDB.perDifficulty or false
     LSSDB.afterLootSpec = LSSDB.afterLootSpec or 0
     LSSDB.globalSilence = LSSDB.globalSilence or false
