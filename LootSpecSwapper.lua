@@ -1,37 +1,35 @@
-local lssFrame = CreateFrame("frame")
+local addonName, addon = ...
 
+-- Create our base frame
+local lssFrame = CreateFrame("frame")
+addon.frame = lssFrame
+
+-- Initialize SavedVariables
 if type(LSSDB) ~= "table" then
   LSSDB = {}
 end
 
-LSSDB.bossNameToSpecMapping = {}
-LSSDB.bossNameToSpecMapping_M = {}
-LSSDB.bossNameToSpecMapping_H = {}
-LSSDB.bossNameToSpecMapping_N = {}
-LSSDB.bossNameToSpecMapping_L = {}
-LSSDB.perDifficulty = false
-LSSDB.specToSwitchToAfterLooting = 0
-LSSDB.globalSilence = false
-LSSDB.minimized = false
-
-local perDiffIDToVarMap = {
-  -- Raids
-  [14] = "LSSDB.bossNameToSpecMapping_N",
-  [15] = "LSSDB.bossNameToSpecMapping_H",
-  [16] = "LSSDB.bossNameToSpecMapping_M",
-  [17] = "LSSDB.bossNameToSpecMapping_L",
-  -- Dungeons
-  [1] = "LSSDB.bossNameToSpecMapping_N",
-  [2] = "LSSDB.bossNameToSpecMapping_H",
-  [23] = "LSSDB.bossNameToSpecMapping_M"
+-- Difficulty Name Table
+local difficultyNames = {
+  ["1"] = "Dungeon Normal",
+  ["2"] = "Dungeon Heroic",
+  ["14"] = "Raid Normal",
+  ["15"] = "Raid Heroic",
+  ["16"] = "Raid Mythic",
+  ["17"] = "Raid LFR",
+  ["23"] = "Dungeon Mythic"
 }
 
+-- Generic Variables
 local autoSwapActive = false
-local globalDisable = false
+
+-- EJ frame stuffs
 local journalSaveButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSSSaveButton",UIParent,"UIPanelButtonTemplate")
 local journalDefaultButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSSDefaultButton",UIParent,"UIPanelButtonTemplate")
 local journalRestoreButton = CreateFrame("Button", "EncounterJournalEncounterFrameInfoCreatureButton1LSSRestoreButton",UIParent,"UIPanelButtonTemplate")
 local f = CreateFrame("frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
+
+-- Spec Variables
 local currPlayerSpecTable = {}
 local maxSpecs = GetNumSpecializations()
 local _,_,classID = UnitClass("player")
@@ -39,13 +37,23 @@ local nextSpecTable = {}
 local lastSpec
 local firstSpec
 
-local origprint = print
-local UnitName = _G["UnitName"]
-local UnitIsDead = _G["UnitIsDead"]
+-- LUA locals
+local print = print
+local UnitName = UnitName
+local UnitIsDead = UnitIsDead
+local debugOn = true
+local EJ_GetDifficulty = EJ_GetDifficulty
+local EJ_GetInstanceInfo = EJ_GetInstanceInfo
 
-local print = function(msg)
+local printOutput = function(msg)
   if(not LSSDB.globalSilence) then
-    origprint(msg)
+    print(msg)
+  end
+end
+
+local debugPrint = function(msg)
+  if (debugOn) then
+    print(msg)
   end
 end
 
@@ -54,10 +62,10 @@ local function BonusWindowClosed()
     local newSpec = lssFrame.onBonusWindowClosedSpec
     if(newSpec == -1) then
       SetLootSpecialization(0)
-      print("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
+      printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
     else
       SetLootSpecialization(newSpec)
-      print("Loot Spec Swapper: CHANGED LOOT SPEC TO: <<"..(select(2,GetSpecializationInfoByID(newSpec)))..">>")
+      printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO: <<"..(select(2,GetSpecializationInfoByID(newSpec)))..">>")
     end
   end
 
@@ -67,42 +75,44 @@ end
 lssFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
 lssFrame:RegisterEvent("LOOT_CLOSED")
 lssFrame:SetScript("OnEvent", function(self, event)
-  if(globalDisable) then return end
+  if (LSSDB.disabled) then return end
   local newSpec = nil
   if(event == "PLAYER_TARGET_CHANGED") then
     if(not UnitIsDead("target")) then
       local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
       local targetName = UnitName("target")
       if not targetName then return end
-      newSpec = LSSDB.bossNameToSpecMapping[targetName..currMapID]
-      if not newSpec then
-        newSpec = LSSDB.bossNameToSpecMapping[targetName]
-      end
+
       if LSSDB.perDifficulty then
+        debugPrint("perDifficulty is true")
         local _,_,diff = GetInstanceInfo()
-        if perDiffIDToVarMap[diff] then
-          newSpec = (_G[perDiffIDToVarMap[diff]])[targetName..currMapID]
-          if not newSpec then
-            newSpec = (_G[perDiffIDToVarMap[diff]])[targetName]
-          end
+        debugPrint("diff: "..diff)
+        if diff then
+          newSpec = LSSDB.specPerBoss[diff][currMapID][targetName]
+        else
+          printOutput("LSS: An error has occurred. Spec setting for this boss ("..difficultyNames[tostring(diff)].." difficulty) not found.")
         end
+      else
+        newSpec = LSSDB.specPerBoss["allDifficulties"][currMapID][targetName]
       end
       if(newSpec) then
         inDefaultSpecAlready = false
         autoSwapActive = true
+      else
+        printOutput("LSS: An error has occurred. Spec setting for this boss (all difficulties) not found.")
       end
     end
   elseif(autoSwapActive and (not (inDefaultSpecAlready--[[ or InCombatLockdown()]]))) then
     autoSwapActive = false
-    if(LSSDB.specToSwitchToAfterLooting ~= 0) then
+    if(LSSDB.afterLootSpec ~= 0) then
       if (GroupLootContainer and GroupLootContainer:IsVisible()) then
-        lssFrame.onBonusWindowClosedSpec = LSSDB.specToSwitchToAfterLooting
+        lssFrame.onBonusWindowClosedSpec = LSSDB.afterLootSpec
         hooksecurefunc("BonusRollFrame_OnHide", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_CloseBonusRoll", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_FinishedFading", BonusWindowClosed)
         hooksecurefunc("BonusRollFrame_AdvanceLootSpinnerAnim", BonusWindowClosed)
       else
-        newSpec = LSSDB.specToSwitchToAfterLooting
+        newSpec = LSSDB.afterLootSpec
       end
       inDefaultSpecAlready = true
     end
@@ -110,10 +120,10 @@ lssFrame:SetScript("OnEvent", function(self, event)
   if(newSpec and ((GetLootSpecialization()) ~= newSpec)) then
     if(newSpec == -1) then
       SetLootSpecialization(0)
-      print("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
+      printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
     else
       SetLootSpecialization(newSpec)
-      print("Loot Spec Swapper: CHANGED LOOT SPEC TO: <<"..(select(2,GetSpecializationInfoByID(newSpec)))..">>")
+      printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO: <<"..(select(2,GetSpecializationInfoByID(newSpec)))..">>")
     end
   end
 end)
@@ -127,25 +137,16 @@ function lssFrame.SlashCommandHandler(cmd)
 
     if(type(currSpec) == "number" and type(currTarget) == "string") then
       if(currSpec == 0) then
-        origprint("Loot Spec Swapper: You must set a spec first (right-click your character frame).")
+        printOutput("Loot Spec Swapper: You must set a spec first (right-click your character frame).")
       else
+        local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
         if LSSDB.perDifficulty then
-          local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
+          local diff = EJ_GetDifficulty()
           if diff then
-            if diff:match(PLAYER_DIFFICULTY1) then
-              LSSDB.bossNameToSpecMapping_N[currTarget] = currSpec
-            elseif diff:match(PLAYER_DIFFICULTY2) then
-              LSSDB.bossNameToSpecMapping_H[currTarget] = currSpec
-            elseif diff:match(PLAYER_DIFFICULTY3) then
-              LSSDB.bossNameToSpecMapping_L[currTarget] = currSpec
-            elseif diff:match(PLAYER_DIFFICULTY6) then
-              LSSDB.bossNameToSpecMapping_M[currTarget] = currSpec
-            else
-              LSSDB.bossNameToSpecMapping[currTarget] = currSpec
-            end
+            LSSDB.specPerBoss[diff][currMapID][currTarget] = currSpec
           end
         else
-          LSSDB.bossNameToSpecMapping[currTarget] = currSpec
+          LSSDB.specPerBoss["allDifficulties"][currMapID][currTarget] = currSpec
         end
       end
     end
@@ -153,75 +154,84 @@ function lssFrame.SlashCommandHandler(cmd)
     local currSpec = (GetLootSpecialization())
     if(type(currSpec) == "number") then
       if(currSpec == 0) then
-        LSSDB.specToSwitchToAfterLooting = -1
+        LSSDB.afterLootSpec = -1
       else
-        LSSDB.specToSwitchToAfterLooting = currSpec
+        LSSDB.afterLootSpec = currSpec
       end
     end
+    printOutput("Loot Spec Swapper: Set default spec to follow your currently selected loot spec.")
   elseif cmd and string.lower(cmd) == "setdefaulttofollow" then
-    LSSDB.specToSwitchToAfterLooting = -1
-    origprint("Loot Spec Swapper: Set default spec to follow your actual spec.")
+    LSSDB.afterLootSpec = -1
+    printOutput("Loot Spec Swapper: Set default spec to follow your actual spec.")
   elseif cmd and string.lower(cmd) == "list" then
-    origprint("Loot Spec Swapper: List")
-    for k,v in pairs(LSSDB.bossNameToSpecMapping) do
-      if(type(v) == "number" and type(k) == "string") then
-        origprint(k..": "..(select(2,GetSpecializationInfoByID(v))))
+    printOutput("Loot Spec Swapper: List")
+    if LSSDB.perDifficulty then
+      for k,v in pairs(LSSDB.specPerBoss) do
+        if k ~= "allDifficulties" then
+          for instance, bossInfo in pairs(v) do
+            for boss, spec in pairs(bossInfo) do
+              local _, specName = GetSpecializationInfoByID(spec)
+              printOutput("Difficulty: "..difficultyNames[tostring(k)].." - Instance ID: "..instance.." - Boss: "..boss..": "..specName)
+            end
+          end
+        end
+      end
+    else
+      for instance, bossInfo in pairs(LSSDB.specPerBoss["allDifficulties"]) do
+        for boss, spec in pairs(bossInfo) do
+          local _, specName = GetSpecializationInfoByID(spec)
+          printOutput("All Difficulties - Instance ID: "..instance.." - Boss: "..boss..": "..specName)
+        end
       end
     end
-    if(LSSDB.specToSwitchToAfterLooting) then
-      if(LSSDB.specToSwitchToAfterLooting == 0) then
-        origprint("Default: <<No default>>")
-      elseif(LSSDB.specToSwitchToAfterLooting == -1) then
-        origprint("Default: <<Current Spec>>")
+    if(LSSDB.afterLootSpec) then
+      if(LSSDB.afterLootSpec == 0) then
+        printOutput("Default Spec: <<No default>>")
+      elseif(LSSDB.afterLootSpec == -1) then
+        printOutput("Default Spec: <<Current Spec>>")
       else
-        origprint("Default: "..(select(2,GetSpecializationInfoByID(LSSDB.specToSwitchToAfterLooting))))
+        local _, specName = GetSpecializationInfoByID(LSSDB.afterLootSpec)
+        printOutput("Default Spec: "..specName)
       end
     end
   elseif cmd and string.lower(cmd) == "forget" then
     local currTarget = overrideTarget or UnitName("target")
     if(type(currTarget) == "string") then
-      local noInstanceTarget = (currTarget:gsub("%d+$","")) or ""
+      local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
       if LSSDB.perDifficulty then
-        local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
+        local diff = EJ_GetDifficulty()
         if diff then
-          if diff:match(PLAYER_DIFFICULTY1) then
-            LSSDB.bossNameToSpecMapping_N[currTarget] = nil
-            LSSDB.bossNameToSpecMapping_N[noInstanceTarget] = nil
-          elseif diff:match(PLAYER_DIFFICULTY2) then
-            LSSDB.bossNameToSpecMapping_H[currTarget] = nil
-            LSSDB.bossNameToSpecMapping_H[noInstanceTarget] = nil
-          elseif diff:match(PLAYER_DIFFICULTY3) then
-            LSSDB.bossNameToSpecMapping_L[currTarget] = nil
-            LSSDB.bossNameToSpecMapping_L[noInstanceTarget] = nil
-          elseif diff:match(PLAYER_DIFFICULTY6) then
-            LSSDB.bossNameToSpecMapping_M[currTarget] = nil
-            LSSDB.bossNameToSpecMapping_M[noInstanceTarget] = nil
-          else
-            LSSDB.bossNameToSpecMapping[currTarget] = nil
-            LSSDB.bossNameToSpecMapping[noInstanceTarget] = nil
-          end
+          LSSDB.specPerBoss[diff][currMapID][currTarget] = nil
         end
       else
-        LSSDB.bossNameToSpecMapping[currTarget] = nil
-        LSSDB.bossNameToSpecMapping[noInstanceTarget] = nil
+        LSSDB.specPerBoss["allDifficulties"][currMapID][currTarget] = nil
       end
     end
   elseif cmd and string.lower(cmd) == "forgetdefault" then
-    LSSDB.specToSwitchToAfterLooting = 0
-    origprint("Loot Spec Swapper: Forgot default spec.")
+    LSSDB.afterLootSpec = 0
+    printOutput("Loot Spec Swapper: Forgot default spec.")
   elseif cmd and string.lower(cmd) == "diff" then
     LSSDB.perDifficulty = not LSSDB.perDifficulty
-    origprint("Store per difficulty-level: " .. (LSSDB.perDifficulty and "true" or "false"))
-  elseif cmd and string.lower(cmd) == "onoff" then
-    globalDisable = not globalDisable
-    f:SetShown(not globalDisable)
-    origprint("Loot Spec Swapper: " .. ((not globalDisable) and "Enabled." or "Disabled."))
+    printOutput("Store per difficulty-level: " .. (LSSDB.perDifficulty and "true" or "false"))
+  elseif cmd and string.lower(cmd) == "toggle" then
+    LSSDB.disabled = not LSSDB.disabled
+    if LSSDB.disabled then
+      f:Hide()
+      journalRestoreButton:Hide()
+    else
+      journalRestoreButton:Show()
+    end
+    printOutput("Loot Spec Swapper: " .. ((not LSSDB.disabled) and "Enabled." or "Disabled."))
   elseif cmd and string.lower(cmd) == "quiet" then
-    print("Loot Spec Swapper: Silenced")
+    printOutput("Loot Spec Swapper: Silenced")
     LSSDB.globalSilence = not LSSDB.globalSilence
-    print("Loot Spec Swapper: Unsilenced")
+    printOutput("Loot Spec Swapper: Unsilenced")
+  elseif cmd and string.lower(cmd) == "reset" then
+    printOutput("Resetting Loot Spec Swapper.")
+    LSSDB.specPerBoss = nil
+    ReloadUI()
   else
-    origprint("Loot Spec Swapper: Usage:\n/lss onoff | quiet | list | diff | record | forget | setdefault | forgetdefault | setdefaulttofollow")
+    printOutput("Command not found: "..cmd.."\nLoot Spec Swapper: Usage:\n/lss toggle | quiet | list | diff | forget | setdefault | forgetdefault | setdefaulttofollow | reset")
   end
 end
 
@@ -233,33 +243,26 @@ end)
 journalSaveButton:SetScript("OnClick",function(self, button)
   local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
   if (not EncounterJournalEncounterFrameInfoCreatureButton1) or (not EncounterJournalEncounterFrameInfoCreatureButton1.name) or (not EJInstanceID) then
-    print("Select a boss first.")
+    printOutput("Select a boss first.")
     return
   end
   if(button == "RightButton") then
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
+    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name
     lssFrame.SlashCommandHandler("forget")
     overrideTarget = nil
   else
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name .. EJInstanceID
+    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name
     overrideSpec = firstSpec
     local selectedSpec = nil
-    selectedSpec = LSSDB.bossNameToSpecMapping[overrideTarget]
     if LSSDB.perDifficulty then
-      local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
+      local diff = EJ_GetDifficulty()
       if diff then
-        if diff:match(PLAYER_DIFFICULTY1) then
-          selectedSpec = LSSDB.bossNameToSpecMapping_N[overrideTarget]
-        elseif diff:match(PLAYER_DIFFICULTY2) then
-          selectedSpec = LSSDB.bossNameToSpecMapping_H[overrideTarget]
-        elseif diff:match(PLAYER_DIFFICULTY3) then
-          selectedSpec = LSSDB.bossNameToSpecMapping_L[overrideTarget]
-        elseif diff:match(PLAYER_DIFFICULTY6) then
-          selectedSpec = LSSDB.bossNameToSpecMapping_M[overrideTarget]
-        end
+        selectedSpec = LSSDB.specPerBoss[diff][EJInstanceID][overrideTarget]
       else
-        print("Select a difficulty first.")
+        printOutput("Select a difficulty first.")
       end
+    else
+      selectedSpec = LSSDB.specPerBoss["allDifficulties"][EJInstanceID][overrideTarget]
     end
     if selectedSpec then
       overrideSpec = selectedSpec
@@ -392,39 +395,29 @@ journalSaveButton:SetScript("OnUpdate",function(self)
     local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
 
     if(type(bossName) == "string") then
-      bossName = bossName .. EJInstanceID
-      local bossSpec = LSSDB.bossNameToSpecMapping[bossName]
+      local bossSpec
       if LSSDB.perDifficulty then
-        local diff = EncounterJournalEncounterFrameInfoDifficulty:GetText()
-        if diff and diff ~= "" then
-          if diff:match(PLAYER_DIFFICULTY1) then
-            if not LSSDB.bossNameToSpecMapping_N then
-              LSSDB.bossNameToSpecMapping_N = {}
-            end
-            bossSpec = LSSDB.bossNameToSpecMapping_N[bossName]
-          elseif diff:match(PLAYER_DIFFICULTY2) then
-            if not LSSDB.bossNameToSpecMapping_H then
-              LSSDB.bossNameToSpecMapping_H = {}
-            end
-            bossSpec = LSSDB.bossNameToSpecMapping_H[bossName]
-          elseif diff:match(PLAYER_DIFFICULTY3) then
-            if not LSSDB.bossNameToSpecMapping_L then
-              LSSDB.bossNameToSpecMapping_L = {}
-            end
-            bossSpec = LSSDB.bossNameToSpecMapping_L[bossName]
-          elseif diff:match(PLAYER_DIFFICULTY6) then
-            if not LSSDB.bossNameToSpecMapping_M then
-              LSSDB.bossNameToSpecMapping_M = {}
-            end
-            bossSpec = LSSDB.bossNameToSpecMapping_M[bossName]
+        local diff = EJ_GetDifficulty()
+        if diff then
+          if not LSSDB.specPerBoss[diff] then
+            LSSDB.specPerBoss[diff] = {}
           end
+          if not LSSDB.specPerBoss[diff][EJInstanceID] then
+            LSSDB.specPerBoss[diff][EJInstanceID] = {}
+          end
+          bossSpec = LSSDB.specPerBoss[diff][EJInstanceID][bossName]
         end
+      else
+        if not LSSDB.specPerBoss["allDifficulties"][EJInstanceID] then
+          LSSDB.specPerBoss["allDifficulties"][EJInstanceID] = {}
+        end
+        bossSpec = LSSDB.specPerBoss["allDifficulties"][EJInstanceID][bossName]
       end
       saveButtonDesc:SetText("Boss: "..bossName.."\nLMB:Toggle, RMB:Clear")
       UpdateSaveButton(bossSpec)
     end
 
-    UpdateDefaultButton(LSSDB.specToSwitchToAfterLooting)
+    UpdateDefaultButton(LSSDB.afterLootSpec)
   end
 end)
 
@@ -448,19 +441,42 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     journalRestoreButton:ClearAllPoints()
     journalRestoreButton:SetPoint("TOP",EncounterJournal,"TOP",340,-4)
     if(LSSDB.minimized) then fClose:Click() end
-      for i=1,maxSpecs do
-        local id, _, _, icon = GetSpecializationInfoForClassID(classID, i)
-        currPlayerSpecTable[i] = {id, icon}
-        if i == 1 then
-          firstSpec = id
-        end
-        if i > 1 then
-          nextSpecTable[lastSpec] = i
-        end
-        if i == maxSpecs then
-          nextSpecTable[id] = 1
-        end
-        lastSpec = id
+    for i=1,maxSpecs do
+      local id, _, _, icon = GetSpecializationInfoForClassID(classID, i)
+      currPlayerSpecTable[i] = {id, icon}
+      if i == 1 then
+        firstSpec = id
       end
+      if i > 1 then
+        nextSpecTable[lastSpec] = i
+      end
+      if i == maxSpecs then
+        nextSpecTable[id] = 1
+      end
+      lastSpec = id
     end
+  end
+
+  if addon == "LootSpecSwapper" then
+    debugPrint("ADDON_LOADED fired. Setting defaults.")
+    -- Create defaults
+    LSSDB.specPerBoss = LSSDB.specPerBoss or {}
+    LSSDB.specPerBoss["allDifficulties"] = LSSDB.specPerBoss["allDifficulties"] or {}
+    LSSDB.perDifficulty = LSSDB.perDifficulty or false
+    LSSDB.afterLootSpec = LSSDB.afterLootSpec or 0
+    LSSDB.globalSilence = LSSDB.globalSilence or false
+    LSSDB.minimized = LSSDB.minimized or false
+    LSSDB.disabled = LSSDB.disabled or false
+
+    debugPrint("ADDON_LOADED fired. Removing old SavedVariables data, if it exists.")
+    -- Remove old SavedVariables data
+    if LSSDB.bossNameToSpecMapping_L then LSSDB.bossNameToSpecMapping_L = nil; end
+    if LSSDB.bossNameToSpecMapping_N then LSSDB.bossNameToSpecMapping_N = nil; end
+    if LSSDB.bossNameToSpecMapping_H then LSSDB.bossNameToSpecMapping_H = nil; end
+    if LSSDB.bossNameToSpecMapping_M then LSSDB.bossNameToSpecMapping_M = nil; end
+    if LSSDB.specToSwitchToAfterLooting then LSSDB.specToSwitchToAfterLooting = nil; end
+
+    -- Create Options Panel
+    LSS_CreateOptionsPanel()
+  end
 end)
