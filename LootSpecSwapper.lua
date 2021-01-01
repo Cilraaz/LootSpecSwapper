@@ -20,6 +20,32 @@ local difficultyNames = {
   ["23"] = "Dungeon Mythic"
 }
 
+-- Table for boss names that don't match the Encounter Journal encounter name
+local bossFixes = {
+  -- Dungeons
+  ["Milificent Manastorm"] = "The Manastorms",
+  ["Millhouse Manastorm"] = "The Manastorms",
+  ["Halkias"] = "Halkias, the Sin-Stained Goliath",
+  ["Azules"] = "Kin-Tara",
+  ["Devos"] = "Devos, Paragon of Doubt",
+  ["Stitchflesh's Creation"] = "Surgeon Stitchflesh",
+  ["Dessia the Decapitator"] = "An Affront of Challengers",
+  ["Paceran the Virulent"] = "An Affront of Challengers",
+  ["Sathel the Accursed"] = "An Affront of Challengers",
+  -- Raids
+  ["Valinor"] = "Valinor, the Light of Eons",
+  ["Margore"] = "Huntsman Altimor",
+  ["Kael'thas Sunstrider"] = "Sun King's Salvation",
+  ["High Torturor Darithos"] = "Sun King's Salvation",
+  ["Bleakwing Assassin"] = "Sun King's Salvation",
+  ["Vile Occultist"] = "Sun King's Salvation",
+  ["Castellan Niklaus"] = "The Council of Blood",
+  ["Baroness Frieda"] = "The Council of Blood",
+  ["Lord Stavros"] = "The Council of Blood",
+  ["General Kaal"] = "Stone Legion Generals",
+  ["General Grashaal"] = "Stone Legion Generals",
+}
+
 -- Generic Variables
 local autoSwapActive = false
 
@@ -80,21 +106,25 @@ lssFrame:SetScript("OnEvent", function(self, event)
   if (event == "PLAYER_TARGET_CHANGED") then
     if (not UnitIsDead("target")) then
       local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
+      local EJInstanceID = EJ_GetInstanceForMap(currMapID)
       local targetName = UnitName("target")
       if not targetName then return end
+      if not (targetName == "General Kaal" and EJInstanceID == 1189) then
+        if bossFixes[targetName] then targetName = bossFixes[targetName] end
+      end
 
       if LSSDB.perDifficulty then
         local _,_,diff = GetInstanceInfo()
         if diff then
           if LSSDB.specPerBoss[diff] then
-            if LSSDB.specPerBoss[diff][currMapID] then
-              newSpec = LSSDB.specPerBoss[diff][currMapID][targetName]
+            if LSSDB.specPerBoss[diff][EJInstanceID] then
+              newSpec = LSSDB.specPerBoss[diff][EJInstanceID][targetName]
             end
           end
         end
       else
-        if LSSDB.specPerBoss.allDifficulties[currMapID] then
-          newSpec = LSSDB.specPerBoss.allDifficulties[currMapID][targetName]
+        if LSSDB.specPerBoss.allDifficulties[EJInstanceID] then
+          newSpec = LSSDB.specPerBoss.allDifficulties[EJInstanceID][targetName]
         end
       end
       if newSpec then
@@ -119,7 +149,7 @@ lssFrame:SetScript("OnEvent", function(self, event)
       inDefaultSpecAlready = true
     end
   end
-  if (newSpec and ((GetLootSpecialization()) ~= newSpec)) then
+  if (newSpec and GetLootSpecialization() ~= newSpec) then
     if (newSpec == -1) then
       SetLootSpecialization(0)
       printOutput("Loot Spec Swapper: CHANGED LOOT SPEC TO FOLLOW CURRENT SPEC")
@@ -141,14 +171,14 @@ function lssFrame.SlashCommandHandler(cmd)
       if (currSpec == 0) then
         printOutput("Loot Spec Swapper: You must set a spec first (right-click your character frame).")
       else
-        local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
+        local EJInstanceID = EncounterJournal.instanceID
         if LSSDB.perDifficulty then
           local diff = EJ_GetDifficulty()
           if diff then
-            LSSDB.specPerBoss[diff][currMapID][currTarget] = currSpec
+            LSSDB.specPerBoss[diff][EJInstanceID][currTarget] = currSpec
           end
         else
-          LSSDB.specPerBoss.allDifficulties[currMapID][currTarget] = currSpec
+          LSSDB.specPerBoss.allDifficulties[EJInstanceID][currTarget] = currSpec
         end
       end
     end
@@ -199,14 +229,14 @@ function lssFrame.SlashCommandHandler(cmd)
   elseif cmd and string.lower(cmd) == "forget" then
     local currTarget = overrideTarget or UnitName("target")
     if (type(currTarget) == "string") then
-      local _,_,_,_,_,_,currMapID = EJ_GetInstanceInfo()
+      local EJInstanceID = EncounterJournal.instanceID
       if LSSDB.perDifficulty then
         local diff = EJ_GetDifficulty()
         if diff then
-          LSSDB.specPerBoss[diff][currMapID][currTarget] = nil
+          LSSDB.specPerBoss[diff][EJInstanceID][currTarget] = nil
         end
       else
-        LSSDB.specPerBoss.allDifficulties[currMapID][currTarget] = nil
+        LSSDB.specPerBoss.allDifficulties[EJInstanceID][currTarget] = nil
       end
     end
   elseif cmd and string.lower(cmd) == "forgetdefault" then
@@ -243,17 +273,17 @@ journalRestoreButton:SetScript("OnClick",function(self)
   LSSDB.minimized = false
 end)
 journalSaveButton:SetScript("OnClick",function(self, button)
-  local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
+  local EJInstanceID = EncounterJournal.instanceID
   if (not EncounterJournalEncounterFrameInfoCreatureButton1) or (not EncounterJournalEncounterFrameInfoCreatureButton1.name) or (not EJInstanceID) then
     printOutput("Select a boss first.")
     return
   end
   if (button == "RightButton") then
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name
+    overrideTarget = EJ_GetEncounterInfo(EncounterJournal.encounterID)
     lssFrame.SlashCommandHandler("forget")
     overrideTarget = nil
   else
-    overrideTarget = EncounterJournalEncounterFrameInfoCreatureButton1.name
+    overrideTarget = EJ_GetEncounterInfo(EncounterJournal.encounterID)
     overrideSpec = firstSpec
     local selectedSpec = nil
     if LSSDB.perDifficulty then
@@ -393,10 +423,14 @@ end
 
 journalSaveButton:SetScript("OnUpdate",function(self)
   if (self:IsVisible()) then
-    local bossName = EncounterJournalEncounterFrameInfoCreatureButton1.name
-    local _,_,_,_,_,_,EJInstanceID = EJ_GetInstanceInfo()
+    local bossID = EncounterJournal.encounterID
+    local bossName = ""
+    if bossID ~= nil then
+      bossName = EJ_GetEncounterInfo(EncounterJournal.encounterID)
+    end
+    local EJInstanceID = EncounterJournal.instanceID
 
-    if (type(bossName) == "string") then
+    if (type(bossName) == "string" and bossName ~= "") then
       local bossSpec
       if LSSDB.perDifficulty then
         local diff = EJ_GetDifficulty()
@@ -460,7 +494,6 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
   end
 
   if addon == "LootSpecSwapper" then
-    debugPrint("ADDON_LOADED fired. Setting defaults.")
     -- Create defaults
     LSSDB.specPerBoss = LSSDB.specPerBoss or {}
     LSSDB.specPerBoss.allDifficulties = LSSDB.specPerBoss.allDifficulties or {}
@@ -470,7 +503,6 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     LSSDB.minimized = LSSDB.minimized or false
     LSSDB.disabled = LSSDB.disabled or false
 
-    debugPrint("ADDON_LOADED fired. Removing old SavedVariables data, if it exists.")
     -- Remove old SavedVariables data
     if LSSDB.bossNameToSpecMapping then LSSDB.bossNameToSpecMapping = nil; end
     if LSSDB.bossNameToSpecMapping_L then LSSDB.bossNameToSpecMapping_L = nil; end
