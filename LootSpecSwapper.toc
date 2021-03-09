@@ -1,8 +1,8 @@
-## Interface: 90002
+## Interface: 90005
 ## Author: Cilraaz
 ## Title: Loot Spec Swapper
 ## Notes: Automatically change your loot spec on a boss-by-boss basis
-## Version: v2021.1.1
+## Version: 9.0.5.01
 ## X-Category: 
 ## X-eMail: Cilraaz@gmail.com
 ## X-Website: 
