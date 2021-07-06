@@ -1,34 +1,35 @@
+name: Create Release v2
+
 on:
   push:
     tags:
       - '*'
 
-name: Create Release
-
 jobs:
-  build:
-    name: Create Release
+  release:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
+      # Do the release checkout
+      - name: Clone Project
+        uses: actions/checkout@v1
       - name: Get Tag
         id: vars
         run: |
           echo ::set-output name=tag::${GITHUB_REF#refs/*/}
           echo ::set-output name=oldtag::$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))
+      # Make a zip file for GitHub
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
           filename: LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
           exclusions: '*.git* *.pkgmeta'
+      # Create a release on GitHub
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: LootSpecSwapper
@@ -36,8 +37,9 @@ jobs:
             Changes: https://github.com/Cilraaz/LootSpecSwapper/compare/${{ steps.vars.outputs.oldtag }}...${{ steps.vars.outputs.tag }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
+      # Upload the zip to the GitHub release
+      - name: Upload Zip
+        id: upload-zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,3 +48,6 @@ jobs:
           asset_path: ./LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
           asset_name: LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
           asset_content_type: applicaton/zip
+      # Use the BigWigs packager for Wago output
+      - name: Package and Release
+        uses: BigWigsMods/packager@v1
