@@ -2,12 +2,13 @@
 ## Author: Cilraaz
 ## Title: Loot Spec Swapper
 ## Notes: Automatically change your loot spec on a boss-by-boss basis
-## Version: 9.1.0.01
+## Version: 9.1.0.02
 ## X-Category: 
 ## X-eMail: Cilraaz@gmail.com
 ## X-Website: 
 ## X-Curse-Project-ID: 363570
 ## X-WoWI-ID: 25789
+## X-Wago-ID: WYK993KL
 # Comment: This is a continuation of AutoLootSpecSwap, which was abandoned after 7.2.5
 
 ## DefaultState: enabled
