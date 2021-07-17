@@ -47,6 +47,7 @@ local bossFixes = {
   ["General Kaal"] = "Stone Legion Generals",
   ["General Grashaal"] = "Stone Legion Generals",
   --- Sanctum of Domination
+  ["Eye of the Jailer"] = "The Eye of the Jailer",
   ["Kyra"] = "The Nine",
   ["Signe"] = "The Nine",
   ["Skyja"] = "The Nine",
