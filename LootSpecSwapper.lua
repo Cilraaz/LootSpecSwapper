@@ -33,7 +33,9 @@ local bossFixes = {
   ["Paceran the Virulent"] = "An Affront of Challengers",
   ["Sathel the Accursed"] = "An Affront of Challengers",
   -- Raids
+  --- World Bosses
   ["Valinor"] = "Valinor, the Light of Eons",
+  --- Castle Nathria
   ["Margore"] = "Huntsman Altimor",
   ["Kael'thas Sunstrider"] = "Sun King's Salvation",
   ["High Torturor Darithos"] = "Sun King's Salvation",
@@ -44,6 +46,10 @@ local bossFixes = {
   ["Lord Stavros"] = "The Council of Blood",
   ["General Kaal"] = "Stone Legion Generals",
   ["General Grashaal"] = "Stone Legion Generals",
+  --- Sanctum of Domination
+  ["Kyra"] = "The Nine",
+  ["Signe"] = "The Nine",
+  ["Skyja"] = "The Nine",
 }
 
 -- Generic Variables
