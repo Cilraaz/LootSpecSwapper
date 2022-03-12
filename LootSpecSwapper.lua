@@ -35,6 +35,8 @@ local bossFixes = {
   -- Raids
   --- World Bosses
   ["Valinor"] = "Valinor, the Light of Eons",
+  ["Mor'geth"] = "Mor'geth, Tormentor of the Damned",
+  ["Sav'thul"] = "Antros",
   --- Castle Nathria
   ["Margore"] = "Huntsman Altimor",
   ["Kael'thas Sunstrider"] = "Sun King's Salvation",
@@ -51,6 +53,16 @@ local bossFixes = {
   ["Kyra"] = "The Nine",
   ["Signe"] = "The Nine",
   ["Skyja"] = "The Nine",
+  --- Sepulcher of the First Ones
+  ["Vigilant Custodian"] = "Vigilant Guardian",
+  ["Skolex"] = "Skolex, the Insatiable Ravener",
+  ["Dausegne"] = "Dausegne, the Fallen Oracle",
+  ["Prototype of War"] = "Prototype Pantheon",
+  ["Prototype of Duty"] = "Prototype Pantheon",
+  ["Lihuvim"] = "Lihuvim, Principal Architect",
+  ["Halondrus"] = "Halondrus the Reclaimer",
+  ["Mal'ganis"] = "Lords of Dread",
+  ["Kin'tessa"] = "Lords of Dread",
 }
 
 -- Generic Variables
