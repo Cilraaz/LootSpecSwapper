@@ -61,7 +61,7 @@ local bossFixes = {
   ["Prototype of Duty"] = "Prototype Pantheon",
   ["Lihuvim"] = "Lihuvim, Principal Architect",
   ["Halondrus"] = "Halondrus the Reclaimer",
-  ["Mal'ganis"] = "Lords of Dread",
+  ["Mal'Ganis"] = "Lords of Dread",
   ["Kin'tessa"] = "Lords of Dread",
 }
 
