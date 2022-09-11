@@ -22,7 +22,7 @@ local difficultyNames = {
 
 -- Table for boss names that don't match the Encounter Journal encounter name
 local bossFixes = {
-  -- Dungeons
+  -- Dungeons (SL)
   ["Milificent Manastorm"] = "The Manastorms",
   ["Millhouse Manastorm"] = "The Manastorms",
   ["Halkias"] = "Halkias, the Sin-Stained Goliath",
@@ -32,12 +32,22 @@ local bossFixes = {
   ["Dessia the Decapitator"] = "An Affront of Challengers",
   ["Paceran the Virulent"] = "An Affront of Challengers",
   ["Sathel the Accursed"] = "An Affront of Challengers",
+  -- Dungeons (DF)
+  ["Rira Hackclaw"] = "Hackclaw's War-Band",
+  ["Gashtooth"] = "Hackclaw's War-Band",
+  ["Tricktotem"] = "Hackclaw's War-Band",
+  ["Erkhart Stormvein"] = "Kyrakka and Erkhart Stormvein",
+  ["Teera"] = "Teera and Maruuk",
+  ["Maruuk"] = "Teera and Maruuk",
+  ["Baelog"] = "The Lost Dwarves",
+  ["Eric \"The Swift\""] = "The Lost Dwarves",
+  ["Olaf"] = "The Lost Dwarves",
   -- Raids
-  --- World Bosses
+  --- World Bosses (SL)
   ["Valinor"] = "Valinor, the Light of Eons",
   ["Mor'geth"] = "Mor'geth, Tormentor of the Damned",
   ["Sav'thul"] = "Antros",
-  --- Castle Nathria
+  --- Castle Nathria (SL)
   ["Margore"] = "Huntsman Altimor",
   ["Kael'thas Sunstrider"] = "Sun King's Salvation",
   ["High Torturor Darithos"] = "Sun King's Salvation",
@@ -48,12 +58,12 @@ local bossFixes = {
   ["Lord Stavros"] = "The Council of Blood",
   ["General Kaal"] = "Stone Legion Generals",
   ["General Grashaal"] = "Stone Legion Generals",
-  --- Sanctum of Domination
+  --- Sanctum of Domination (SL)
   ["Eye of the Jailer"] = "The Eye of the Jailer",
   ["Kyra"] = "The Nine",
   ["Signe"] = "The Nine",
   ["Skyja"] = "The Nine",
-  --- Sepulcher of the First Ones
+  --- Sepulcher of the First Ones (SL)
   ["Vigilant Custodian"] = "Vigilant Guardian",
   ["Skolex"] = "Skolex, the Insatiable Ravener",
   ["Dausegne"] = "Dausegne, the Fallen Oracle",
@@ -63,6 +73,11 @@ local bossFixes = {
   ["Halondrus"] = "Halondrus the Reclaimer",
   ["Mal'Ganis"] = "Lords of Dread",
   ["Kin'tessa"] = "Lords of Dread",
+  --- World Bosses (DF)
+  ["Strunraan"] = "Strunraan, The Sky's Misery",
+  ["Basrikron"] = "Basrikron, The Shale Wing",
+  ["Bazual"] = "Bazual, The Dreaded Flame",
+  ["Liskanoth"] = "Liskanoth, The Futurebane",
 }
 
 -- Generic Variables
@@ -201,7 +216,7 @@ function lssFrame.SlashCommandHandler(cmd)
         end
       end
     end
-  elseif cmd and string.lower(cmd) == "setdefault" then
+  elseif cmd and string.lower(cmd) == "setspecafter" then
     local currSpec = (GetLootSpecialization())
     if (type(currSpec) == "number") then
       if (currSpec == 0) then
@@ -210,10 +225,10 @@ function lssFrame.SlashCommandHandler(cmd)
         LSSDB.afterLootSpec = currSpec
       end
     end
-    printOutput("Loot Spec Swapper: Set default spec to follow your currently selected loot spec.")
-  elseif cmd and string.lower(cmd) == "setdefaulttofollow" then
+    printOutput("Loot Spec Swapper: Set your after loot spec to your currently selected loot spec.")
+  elseif cmd and string.lower(cmd) == "setactualafter" then
     LSSDB.afterLootSpec = -1
-    printOutput("Loot Spec Swapper: Set default spec to follow your actual spec.")
+    printOutput("Loot Spec Swapper: Set your after loot spec to your actual spec.")
   elseif cmd and string.lower(cmd) == "list" then
     printOutput("Loot Spec Swapper: List")
     if LSSDB.perDifficulty then
@@ -280,9 +295,22 @@ function lssFrame.SlashCommandHandler(cmd)
   elseif cmd and string.lower(cmd) == "reset" then
     printOutput("Resetting Loot Spec Swapper.")
     LSSDB.specPerBoss = nil
+    LSSDB.afterLootSpec = 0
+    LSSDB.globalSilence = false
+    LSSDB.perDifficulty = false
+    LSSDB.disabled = false
     ReloadUI()
   else
-    printOutput("Command not found: "..cmd.."\nLoot Spec Swapper: Usage:\n/lss toggle | quiet | list | diff | forget | setdefault | forgetdefault | setdefaulttofollow | reset")
+    printOutput("LSS: Command not found or help requested")
+    printOutput("Loot Spec Swapper usage:")
+    printOutput("/lss toggle - Disable the addon's functionality")
+    printOutput("/lss quiet - Silence or Unsilence the addon")
+    printOutput("/lss list - Show Default Spec and all selected per-boss specs")
+    printOutput("/lss diff - Enable or disable per-difficulty spec handling")
+    printOutput("/lss setspecafter - LSS will change to your currently selected loot spec after looting a boss")
+    printOutput("/lss setactualafter - LSS will change to your current actual spec after looting a boss")
+    printOutput("/lss forgetdefault - Forget your selected default spec")
+    printOutput("/lss reset - Reset all LSS settings and reload UI")
   end
 end
 
@@ -332,7 +360,7 @@ journalDefaultButton:SetScript("OnClick",function(self, button)
   if (button == "RightButton") then
     lssFrame.SlashCommandHandler("forgetdefault")
   else
-    lssFrame.SlashCommandHandler("setdefault")
+    lssFrame.SlashCommandHandler("setspecafter")
   end
 end)
 journalDefaultButton:RegisterForClicks("AnyDown")
@@ -495,6 +523,8 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     journalRestoreButton:SetParent(EncounterJournal)
     journalRestoreButton:ClearAllPoints()
     journalRestoreButton:SetPoint("TOP",EncounterJournal,"TOP",340,-4)
+    journalRestoreButton:SetFrameStrata(EncounterJournalCloseButton:GetFrameStrata())
+    journalRestoreButton:SetFrameLevel(EncounterJournalCloseButton:GetFrameLevel() + 100)
     if (LSSDB.minimized) then fClose:Click() end
     for i=1,maxSpecs do
       local id, _, _, icon = GetSpecializationInfoForClassID(classID, i)
