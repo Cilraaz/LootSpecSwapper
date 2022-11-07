@@ -18,8 +18,8 @@ jobs:
       - name: Get Tag
         id: vars
         run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-          echo ::set-output name=oldtag::$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))
+          echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "oldtag=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
       # Make a zip file for GitHub
       - name: Archive Release
         uses: thedoctor0/zip-release@master
@@ -29,18 +29,18 @@ jobs:
       # Create a release on GitHub
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1.11.1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: LootSpecSwapper
+          tag: ${{ github.ref }}
+          name: LootSpecSwapper
           body: |
-            Changes: https://github.com/Cilraaz/LootSpecSwapper/compare/${{ steps.vars.outputs.oldtag }}...${{ steps.vars.outputs.tag }}
+            Changes: https://github.com/Cilraaz/LootSpecSwapper/compare/${{ env.oldtag }}...${{ env.tag }}
           draft: false
           prerelease: false
       # Upload the zip to the GitHub release
       - name: Upload Zip
         id: upload-zip
-        uses: actions/upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1.6.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
