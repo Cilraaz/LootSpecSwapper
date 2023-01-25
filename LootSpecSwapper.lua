@@ -21,6 +21,7 @@ local difficultyNames = {
 }
 
 -- Table for boss names that don't match the Encounter Journal encounter name
+-- ["Actual Boss Name"] = "Encounter Journal Boss Name",
 local bossFixes = {
   -- Dungeons (SL)
   ["Milificent Manastorm"] = "The Manastorms",
@@ -42,6 +43,7 @@ local bossFixes = {
   ["Baelog"] = "The Lost Dwarves",
   ["Eric \"The Swift\""] = "The Lost Dwarves",
   ["Olaf"] = "The Lost Dwarves",
+
   -- Raids
   --- World Bosses (SL)
   ["Valinor"] = "Valinor, the Light of Eons",
@@ -78,6 +80,12 @@ local bossFixes = {
   ["Basrikron"] = "Basrikron, The Shale Wing",
   ["Bazual"] = "Bazual, The Dreaded Flame",
   ["Liskanoth"] = "Liskanoth, The Futurebane",
+  --- Vault of the Incarnates (DF)
+  ["Kadros Icewrath"] = "The Primal Council",
+  ["Dathea Stormlash"] = "The Primal Council",
+  ["Opalfang"] = "The Primal Council",
+  ["Embar Firepath"] = "The Primal Council",
+  ["Sennarth, The Cold Breath"] = "Sennarth, the Cold Breath",
 }
 
 -- Generic Variables
