@@ -23,6 +23,15 @@ local difficultyNames = {
 -- Table for boss names that don't match the Encounter Journal encounter name
 -- ["Actual Boss Name"] = "Encounter Journal Boss Name",
 local bossFixes = {
+  -- Dungeons (Cataclysm)
+  ["Asaad"] = "Asaad, Caliph of Zephyrs",
+  -- Dungeons (Legion)
+  ["Dargrul"] = "Dargrul the Underking",
+  -- Dungeons (BfA)
+  ["Captain Eudora"] = "Council o\' Captains",
+  ["Captain Jolly"] = "Council o\' Captains",
+  ["Captain Raoul"] = "Council o\' Captains",
+  ["Shark Puncher"] = "Ring of Booty",
   -- Dungeons (SL)
   ["Milificent Manastorm"] = "The Manastorms",
   ["Millhouse Manastorm"] = "The Manastorms",
@@ -86,6 +95,17 @@ local bossFixes = {
   ["Opalfang"] = "The Primal Council",
   ["Embar Firepath"] = "The Primal Council",
   ["Sennarth, The Cold Breath"] = "Sennarth, the Cold Breath",
+  --- Aberrus, the Shadowed Crucible (DF)
+  ["Kazzara"] = "Kazzara, the Hellforged",
+  ["Essence of Shadow"] = "The Amalgamation Chamber",
+  ["Eternal Blaze"] = "The Amalgamation Chamber",
+  ["Neldris"] = "The Forgotten Experiments",
+  ["Thadrion"] = "The Forgotten Experiments",
+  ["Rionthus"] = "The Forgotten Experiments",
+  ["Rashok"] = "Rashok, the Elder",
+  ["Warlord Kagni"] = "Assault of the Zaqali",
+  ["Zskarn"] = "The Vigilant Steward, Zskarn",
+  ["Neltharion"] = "Echo of Neltharion",
 }
 
 -- Generic Variables
