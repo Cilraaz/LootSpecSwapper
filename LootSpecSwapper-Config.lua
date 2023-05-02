@@ -1,4 +1,5 @@
 local addonName, addon = ...
+local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
 
 function LSS_CreateOptionsPanel()
 
