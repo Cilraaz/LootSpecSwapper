@@ -24,7 +24,7 @@ jobs:
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
-          filename: LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
+          filename: LootSpecSwapper-${{ env.tag }}.zip
           exclusions: '*.git* *.pkgmeta'
       # Create a release on GitHub
       - name: Create Release
@@ -45,9 +45,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
-          asset_name: LootSpecSwapper-${{ steps.vars.outputs.tag }}.zip
-          asset_content_type: applicaton/zip
+          asset_path: ./LootSpecSwapper-${{ env.tag }}.zip
+          asset_name: LootSpecSwapper-${{ env.tag }}.zip
+          asset_content_type: application/zip
       # Use the BigWigs packager for Wago output
       - name: Package and Release
         uses: BigWigsMods/packager@v1
