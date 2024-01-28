@@ -85,10 +85,29 @@ function LSS_CreateOptionsPanel()
   local silenceLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
   silenceLabel:SetPoint('LEFT', silenceCheckbox, 'RIGHT', 0, 0)
   silenceLabel:SetText("Check to disable addon messages")
+  
+  -- Debug Checkbox
+  local debugCheckbox = CreateFrame('CheckButton', nil, configFrame, 'InterfaceOptionsCheckButtonTemplate')
+  debugCheckbox:SetPoint('TOPLEFT', silenceCheckbox, 'BOTTOMLEFT', 0, -5)
+  debugCheckbox:SetChecked(LSSDB.debugOn)
+  debugCheckbox:SetScript("OnClick", function(self)
+    local tick = self:GetChecked()
+    if tick then
+      PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+    else
+      PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
+    end
+    addon.frame.SlashCommandHandler("debug")
+  end)
+  
+  -- Debug Label
+  local debugLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
+  debugLabel:SetPoint('LEFT', debugCheckbox, 'RIGHT', 0, 0)
+  debugLabel:SetText("Check to Debug")
 
   -- Spec Options
   local specOptionsLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')
-  specOptionsLabel:SetPoint('TOPLEFT', silenceCheckbox, 'BOTTOMLEFT', -20, -10)
+  specOptionsLabel:SetPoint('TOPLEFT', debugCheckbox, 'BOTTOMLEFT', -20, -10)
   specOptionsLabel:SetText("Specializations Options")
 
   -- Forget Default Spec
