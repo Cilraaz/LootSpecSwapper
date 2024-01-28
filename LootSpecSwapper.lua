@@ -106,6 +106,10 @@ local bossFixes = {
   ["Warlord Kagni"] = "Assault of the Zaqali",
   ["Zskarn"] = "The Vigilant Steward, Zskarn",
   ["Neltharion"] = "Echo of Neltharion",
+  --- Amidrassil (DF)
+  ["Nymue"] = "Nymue, Weaver of the Cycle",
+  ["Tindral Sageswift"] = "Tindral Sageswift, Seer of the Flame",
+  ["Fyrakk"] = "Fyrakk the Blazing",
 }
 
 -- Generic Variables
@@ -129,7 +133,6 @@ local firstSpec
 local print = print
 local UnitName = UnitName
 local UnitIsDead = UnitIsDead
-local debugOn = false
 local EJ_GetDifficulty = EJ_GetDifficulty
 local EJ_GetInstanceInfo = EJ_GetInstanceInfo
 
@@ -140,7 +143,7 @@ local printOutput = function(msg)
 end
 
 local debugPrint = function(msg)
-  if (debugOn) then
+  if (LSSDB.debugOn) then
     print(msg)
   end
 end
@@ -174,6 +177,10 @@ lssFrame:SetScript("OnEvent", function(self, event)
       if not (targetName == "General Kaal" and EJInstanceID == 1189) then
         if bossFixes[targetName] then targetName = bossFixes[targetName] end
       end
+	  debugPrint("targetName: "..targetName)
+	  if bossFixes[targetName] then
+	    debugPrint("bossFixes: "..bossFixes[targetName])
+	  end
 
       if LSSDB.perDifficulty then
         local _,_,diff = GetInstanceInfo()
@@ -320,6 +327,9 @@ function lssFrame.SlashCommandHandler(cmd)
     printOutput("Loot Spec Swapper: Silenced")
     LSSDB.globalSilence = not LSSDB.globalSilence
     printOutput("Loot Spec Swapper: Unsilenced")
+  elseif cmd and string.lower(cmd) == "debug" then
+    LSSDB.debugOn = not LSSDB.debugOn
+	printOutput("Loot Spec Swapper: "..LSSDB.debugOn)
   elseif cmd and string.lower(cmd) == "reset" then
     printOutput("Resetting Loot Spec Swapper.")
     LSSDB.specPerBoss = nil
@@ -579,6 +589,7 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     LSSDB.globalSilence = LSSDB.globalSilence or false
     LSSDB.minimized = LSSDB.minimized or false
     LSSDB.disabled = LSSDB.disabled or false
+    LSSDB.debugOn = LSSDB.debugOn or false
 
     -- Remove old SavedVariables data
     if LSSDB.bossNameToSpecMapping then LSSDB.bossNameToSpecMapping = nil; end
