@@ -589,7 +589,7 @@ loadframe:SetScript("OnEvent",function(self,event,addon)
     LSSDB.globalSilence = LSSDB.globalSilence or false
     LSSDB.minimized = LSSDB.minimized or false
     LSSDB.disabled = LSSDB.disabled or false
-	LSSDB.debugOn = LSSDB.debugOn or false
+    LSSDB.debugOn = LSSDB.debugOn or false
 
     -- Remove old SavedVariables data
     if LSSDB.bossNameToSpecMapping then LSSDB.bossNameToSpecMapping = nil; end
