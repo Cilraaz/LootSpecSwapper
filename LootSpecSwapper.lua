@@ -107,6 +107,9 @@ local bossFixes = {
   ["Zskarn"] = "The Vigilant Steward, Zskarn",
   ["Neltharion"] = "Echo of Neltharion",
   --- Amidrassil (DF)
+  ["Urctos"] = "Council of Dreams",
+  ["Aerwynn"] = "Council of Dreams",
+  ["Pip"] = "Council of Dreams",
   ["Nymue"] = "Nymue, Weaver of the Cycle",
   ["Tindral Sageswift"] = "Tindral Sageswift, Seer of the Flame",
   ["Fyrakk"] = "Fyrakk the Blazing",
