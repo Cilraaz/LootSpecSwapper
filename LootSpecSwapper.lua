@@ -94,7 +94,7 @@ local bossFixes = {
   ["Dathea Stormlash"] = "The Primal Council",
   ["Opalfang"] = "The Primal Council",
   ["Embar Firepath"] = "The Primal Council",
-  ["Sennarth, The Cold Breath"] = "Sennarth, the Cold Breath",
+  ["Sennarth"] = "Sennarth, the Cold Breath",
   --- Aberrus, the Shadowed Crucible (DF)
   ["Kazzara"] = "Kazzara, the Hellforged",
   ["Essence of Shadow"] = "The Amalgamation Chamber",
@@ -106,6 +106,7 @@ local bossFixes = {
   ["Warlord Kagni"] = "Assault of the Zaqali",
   ["Zskarn"] = "The Vigilant Steward, Zskarn",
   ["Neltharion"] = "Echo of Neltharion",
+  ["Sarkareth"] = "Scalecommander Sarkareth",
   --- Amidrassil (DF)
   ["Urctos"] = "Council of Dreams",
   ["Aerwynn"] = "Council of Dreams",
