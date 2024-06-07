@@ -7,7 +7,15 @@ function LSS_CreateOptionsPanel()
   local configFrame = CreateFrame('Frame', 'LSSConfigFrame', InterfaceOptionsFramePanelContainer)
   configFrame:Hide()
   configFrame.name = 'Loot Spec Swapper'
-  InterfaceOptions_AddCategory(configFrame)
+
+  local BuildInfo = { GetBuildInfo() }
+  if BuildInfo[4] >= 110000 then
+    local category, layout = Settings.RegisterCanvasLayoutCategory(configFrame, configFrame.name)
+    Settings.RegisterAddOnCategory(category)
+    addon.SettingsCategory = category
+  else
+    InterfaceOptions_AddCategory(configFrame)
+  end
 
   -- Create Title
   local titleLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
