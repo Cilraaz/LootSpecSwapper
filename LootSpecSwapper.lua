@@ -52,6 +52,21 @@ local bossFixes = {
   ["Baelog"] = "The Lost Dwarves",
   ["Eric \"The Swift\""] = "The Lost Dwarves",
   ["Olaf"] = "The Lost Dwarves",
+  -- Dungeons (TWW)
+  ["Nx"] = "Fangs of the Queen",
+  ["Vx"] = "Fangs of the Queen",
+  ["Starved Crawler"] = "Avanoxx",
+  ["Thirsty Patron"] = "Brew Master Aldryr",
+  ["Brew Drop"] = "I'pa",
+  ["Cindy"] = "Benk Buzzbee",
+  ["Ravenous Cinderbee"] = "Benk Buzzbee",
+  ["Yes Man"] = "Goldie Baronbottom",
+  ["Elaena Emberlanz"] = "Captain Dailcry",
+  ["Sergeant Shaynemail"] = "Captain Dailcry",
+  ["Taener Duelmal"] = "Captain Dailcry",
+  ["E.D.N.A"] = "E.D.N.A.",
+  ["Speaker Dorlita"] = "Master Machinists",
+  ["Speaker Brokk"] = "Master Machinists",
 
   -- Raids
   --- World Bosses (SL)
@@ -114,6 +129,15 @@ local bossFixes = {
   ["Nymue"] = "Nymue, Weaver of the Cycle",
   ["Tindral Sageswift"] = "Tindral Sageswift, Seer of the Flame",
   ["Fyrakk"] = "Fyrakk the Blazing",
+  --- World Bosses (TWW)
+  ["Kordac"] = "Kordac, the Dormant Protector",
+  ["Shurrai"] = "Shurrai, Atrocity of the Undersea",
+  ["Orta"] = "Orta, the Broken Mountain",
+  --- Nerub-ar Palace (TWW)
+  ["Sikran"] = "Sikran, Captain of the Sureki",
+  ["Anum'arash"] = "The Silken Court",
+  ["Skeinspinner Takazj"] = "The Silken Court",
+  ["Shattershell Scarab"] = "The Silken Court",
 }
 
 -- Generic Variables
