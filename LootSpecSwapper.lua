@@ -140,8 +140,11 @@ local bossFixes = {
   ["Shattershell Scarab"] = "The Silken Court",
   -- Liberation of Undermine (TWW)
   ["The Geargrinder"] = "Vexie and the Geargrinders",
+  ["Vexie Fullthrottle"] = "Vexie and the Geargrinders",
   ["Flarendo the Furious"] = "Cauldron of Carnage",
+  ["Flarendo"] = "Cauldron of Carnage",
   ["Torq the Tempest"] = "Cauldron of Carnage",
+  ["Torq"] = "Cauldron of Carnage",
   ["One-Armed Bandit"] = "The One-Armed Bandit",
   ["Mug'Zee"] = "Mug'Zee, Heads of Security",
 }
