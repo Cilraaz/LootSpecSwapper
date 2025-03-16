@@ -168,9 +168,23 @@ local firstSpec
 
 -- LUA locals
 local print = print
+
+-- General API locals
+local GetInstanceInfo = GetInstanceInfo
+local GetLootSpecialization = GetLootSpecialization
+local GetSpecializationInfoByID = GetSpecializationInfoByID
+local SetLootSpecialization = SetLootSpecialization
 local UnitName = UnitName
 local UnitIsDead = UnitIsDead
+
+-- C_Map API locals
+local GetBestMapForUnit = C_Map.GetBestMapForUnit
+
+-- Encounter Journal API locals
+local EncounterJournal = EncounterJournal
 local EJ_GetDifficulty = EJ_GetDifficulty
+local EJ_GetEncounterInfo = EJ_GetEncounterInfo
+local EJ_GetInstanceForMap = EJ_GetInstanceForMap
 local EJ_GetInstanceInfo = EJ_GetInstanceInfo
 
 local printOutput = function(msg)
@@ -207,7 +221,7 @@ lssFrame:SetScript("OnEvent", function(self, event)
   local newSpec = nil
   if (event == "PLAYER_TARGET_CHANGED") then
     if (not UnitIsDead("target")) then
-      local currMapID = (C_Map.GetBestMapForUnit("player")) or 0
+      local currMapID = (GetBestMapForUnit("player")) or 0
       local EJInstanceID = EJ_GetInstanceForMap(currMapID)
       local targetName = UnitName("target")
       if not targetName then return end
