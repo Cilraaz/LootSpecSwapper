@@ -138,6 +138,12 @@ local bossFixes = {
   ["Anum'arash"] = "The Silken Court",
   ["Skeinspinner Takazj"] = "The Silken Court",
   ["Shattershell Scarab"] = "The Silken Court",
+  -- Liberation of Undermine (TWW)
+  ["The Geargrinder"] = "Vexie and the Geargrinders",
+  ["Flarendo the Furious"] = "Cauldron of Carnage",
+  ["Torq the Tempest"] = "Cauldron of Carnage",
+  ["One-Armed Bandit"] = "The One-Armed Bandit",
+  ["Mug'Zee"] = "Mug'Zee, Heads of Security",
 }
 
 -- Generic Variables
