@@ -32,6 +32,9 @@ local bossFixes = {
   ["Captain Jolly"] = "Council o\' Captains",
   ["Captain Raoul"] = "Council o\' Captains",
   ["Shark Puncher"] = "Ring of Booty",
+  ["The Platinum Puncher"] = "Tussle Tonks",
+  ["Gnomercy 4.U."] = "Tussle Tonks",
+  ["Head Machinist Sparkflux"] = "Machinist's Garden",
   -- Dungeons (SL)
   ["Milificent Manastorm"] = "The Manastorms",
   ["Millhouse Manastorm"] = "The Manastorms",
@@ -42,6 +45,7 @@ local bossFixes = {
   ["Dessia the Decapitator"] = "An Affront of Challengers",
   ["Paceran the Virulent"] = "An Affront of Challengers",
   ["Sathel the Accursed"] = "An Affront of Challengers",
+  ["Mordretha"] = "Mordretha, the Endless Empress",
   -- Dungeons (DF)
   ["Rira Hackclaw"] = "Hackclaw's War-Band",
   ["Gashtooth"] = "Hackclaw's War-Band",
@@ -67,6 +71,8 @@ local bossFixes = {
   ["E.D.N.A"] = "E.D.N.A.",
   ["Speaker Dorlita"] = "Master Machinists",
   ["Speaker Brokk"] = "Master Machinists",
+  ["Keeza Quickfuse"] = "Demolition Duo",
+  ["Bront"] = "Demolition Duo",
 
   -- Raids
   --- World Bosses (SL)
