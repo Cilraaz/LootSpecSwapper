@@ -187,7 +187,6 @@ local UnitIsDead = UnitIsDead
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
 
 -- Encounter Journal API locals
-local EncounterJournal = EncounterJournal
 local EJ_GetDifficulty = EJ_GetDifficulty
 local EJ_GetEncounterInfo = EJ_GetEncounterInfo
 local EJ_GetInstanceForMap = EJ_GetInstanceForMap
