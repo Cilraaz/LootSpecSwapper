@@ -51,5 +51,7 @@ jobs:
       # Use the BigWigs packager for Wago output
       - name: Package and Release
         uses: BigWigsMods/packager@master
+        env:
+            WAGO_API_TOKEN: ${{ secrets.WAGP_API_TOKEN }}
         with:
             args: -a WYK993KL -n "${{ env.tag }}"
