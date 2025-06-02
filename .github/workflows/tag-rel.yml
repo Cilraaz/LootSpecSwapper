@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      WAGO_API_TOKEN: ${{ secrets.WAGP_API_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
     steps:
       # Do the release checkout
       - name: Clone Project
@@ -52,6 +52,6 @@ jobs:
       - name: Package and Release
         uses: BigWigsMods/packager@master
         env:
-            WAGO_API_TOKEN: ${{ secrets.WAGP_API_TOKEN }}
+            WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
         with:
             args: -a WYK993KL -n "${{ env.tag }}"
