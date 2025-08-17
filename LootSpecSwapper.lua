@@ -73,6 +73,8 @@ local bossFixes = {
   ["Speaker Brokk"] = "Master Machinists",
   ["Keeza Quickfuse"] = "Demolition Duo",
   ["Bront"] = "Demolition Duo",
+  ["A'wazj"] = "Taah'bat and A'wazj",
+  ["Taah'bat"] = "Taah'bat and A'wazj",
 
   -- Raids
   --- World Bosses (SL)
@@ -139,6 +141,7 @@ local bossFixes = {
   ["Kordac"] = "Kordac, the Dormant Protector",
   ["Shurrai"] = "Shurrai, Atrocity of the Undersea",
   ["Orta"] = "Orta, the Broken Mountain",
+  ["Reshanor"] = "Reshanor, The Untethered",
   --- Nerub-ar Palace (TWW)
   ["Sikran"] = "Sikran, Captain of the Sureki",
   ["Anum'arash"] = "The Silken Court",
@@ -153,6 +156,11 @@ local bossFixes = {
   ["Torq"] = "Cauldron of Carnage",
   ["One-Armed Bandit"] = "The One-Armed Bandit",
   ["Mug'Zee"] = "Mug'Zee, Heads of Security",
+  -- Manaforge Omega (TWW)
+  ["Ilyssa Darksorrow"] = "The Soul Hunters",
+  ["Velaryn Bloodwrath"] = "The Soul Hunters",
+  ["Adarus Duskblaze"] = "The Soul Hunters",
+  ["Dimensius"] = "Dimensius, the All-Devouring",
 }
 
 -- Generic Variables
