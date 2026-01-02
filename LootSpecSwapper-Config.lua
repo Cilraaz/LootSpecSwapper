@@ -136,7 +136,7 @@ function LSS_CreateOptionsPanel()
   setDefaultButton:SetHeight(24)
   setDefaultButton:SetPoint('TOPLEFT', forgetDefaultButton, 'TOPLEFT', 160, 0)
   setDefaultButton:SetScript("OnClick", function()
-    addon.frame.SlashCommandHandler("setdefault")
+    addon.frame.SlashCommandHandler("setspecafter")
   end)
   setDefaultButton.tooltipText = "This will set the addon's default loot spec to your currently selected loot spec."
   
@@ -146,7 +146,7 @@ function LSS_CreateOptionsPanel()
   defaultFollowButton:SetHeight(24)
   defaultFollowButton:SetPoint('TOPLEFT', setDefaultButton, 'TOPLEFT', 160, 0)
   defaultFollowButton:SetScript("OnClick", function()
-    addon.frame.SlashCommandHandler("setdefaulttofollow")
+    addon.frame.SlashCommandHandler("setactualafter")
   end)
   defaultFollowButton.tooltipText = "This will set the addon's default loot spec to your current actual spec."
 
