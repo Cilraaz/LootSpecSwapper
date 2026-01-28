@@ -271,14 +271,14 @@ lssFrame:SetScript("OnEvent", function(self, event)
       local currMapID = (GetBestMapForUnit("player")) or 0
       local EJInstanceID = EJ_GetInstanceForMap(currMapID)
       local targetName = UnitName("target")
-      if not targetName then return end
+      if not targetName or issecretvalue(targetName) then return end
       if not (targetName == "General Kaal" and EJInstanceID == 1189) then
         if bossFixes[targetName] then targetName = bossFixes[targetName] end
       end
-	  debugPrint("targetName: "..targetName)
-	  if bossFixes[targetName] then
-	    debugPrint("bossFixes: "..bossFixes[targetName])
-	  end
+	    debugPrint("targetName: "..targetName)
+	    if bossFixes[targetName] then
+	      debugPrint("bossFixes: "..bossFixes[targetName])
+	    end
 
       if LSSDB.perDifficulty then
         local _,_,diff = GetInstanceInfo()
