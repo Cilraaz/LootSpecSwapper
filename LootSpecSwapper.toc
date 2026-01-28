@@ -2,17 +2,21 @@
 ## Author: Cilraaz
 ## Title: Loot Spec Swapper
 ## Notes: Automatically change your loot spec on a boss-by-boss basis
-## Version: 12.0.0.02
-## X-Category: 
+## Version: 12.0.0.03
+## X-Category: Loot
 ## X-eMail: Cilraaz@gmail.com
-## X-Website: 
 ## X-Curse-Project-ID: 363570
 ## X-WoWI-ID: 25789
 ## X-Wago-ID: WYK993KL
-# Comment: This is a continuation of AutoLootSpecSwap, which was abandoned after 7.2.5
-
 ## DefaultState: enabled
 ## SavedVariablesPerCharacter: LSSDB
 
-LootSpecSwapper-Config.lua
-LootSpecSwapper.lua
+# Core files
+Core.lua
+Data\BossFixes.lua
+Modules\Database.lua
+Modules\SpecManager.lua
+Modules\EventHandler.lua
+Modules\Commands.lua
+Modules\UI.lua
+Modules\Config.lua
