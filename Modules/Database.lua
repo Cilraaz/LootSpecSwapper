@@ -8,7 +8,7 @@ LSS.db = Database
 
 -- Default database structure
 local defaults = {
-	version = 1,
+	version = 2,
 	perDifficulty = false,
 	afterLootSpec = 0, -- 0 = none, -1 = current spec, >0 = specific spec ID
 	globalSilence = false,
@@ -77,110 +77,95 @@ function Database:CleanupOldData()
 			LSS:Debug("Removed old database key: %s", key)
 		end
 	end
+
+	-- Old entries can't be migrated meaningfully, so wipe and start fresh.
+	if (self.data.version or 1) < 2 then
+		self.data.specPerBoss = self:DeepCopy(defaults.specPerBoss)
+		self.data.version = 2
+		LSS:Print("Saved data upgraded to v2 (boss specs reset — please reconfigure).")
+	end
 end
 
 -- Get spec for a boss
-function Database:GetBossSpec(instanceID, bossName, difficulty)
-	if not instanceID or not bossName then
+function Database:GetBossSpec(encounterID, difficulty)
+	if not encounterID then
 		return nil
 	end
-	
+
 	if self.data.perDifficulty and difficulty then
-		if self.data.specPerBoss[difficulty] and 
-		   self.data.specPerBoss[difficulty][instanceID] then
-			return self.data.specPerBoss[difficulty][instanceID][bossName]
+		if self.data.specPerBoss[difficulty] then
+			return self.data.specPerBoss[difficulty][encounterID]
 		end
 	else
-		if self.data.specPerBoss.allDifficulties[instanceID] then
-			return self.data.specPerBoss.allDifficulties[instanceID][bossName]
-		end
+		return self.data.specPerBoss.allDifficulties[encounterID]
 	end
-	
+
 	return nil
 end
 
 -- Set spec for a boss
-function Database:SetBossSpec(instanceID, bossName, specID, difficulty)
-	if not instanceID or not bossName or not specID then
+function Database:SetBossSpec(encounterID, specID, difficulty)
+	if not encounterID or not specID then
 		return false
 	end
-	
+
 	if self.data.perDifficulty and difficulty then
-		-- Ensure structure exists
 		if not self.data.specPerBoss[difficulty] then
 			self.data.specPerBoss[difficulty] = {}
 		end
-		if not self.data.specPerBoss[difficulty][instanceID] then
-			self.data.specPerBoss[difficulty][instanceID] = {}
-		end
-		
-		self.data.specPerBoss[difficulty][instanceID][bossName] = specID
+		self.data.specPerBoss[difficulty][encounterID] = specID
 	else
-		-- Ensure structure exists
-		if not self.data.specPerBoss.allDifficulties[instanceID] then
-			self.data.specPerBoss.allDifficulties[instanceID] = {}
-		end
-		
-		self.data.specPerBoss.allDifficulties[instanceID][bossName] = specID
+		self.data.specPerBoss.allDifficulties[encounterID] = specID
 	end
-	
+
 	return true
 end
 
 -- Remove spec for a boss
-function Database:RemoveBossSpec(instanceID, bossName, difficulty)
-	if not instanceID or not bossName then
+function Database:RemoveBossSpec(encounterID, difficulty)
+	if not encounterID then
 		return false
 	end
-	
+
 	if self.data.perDifficulty and difficulty then
-		if self.data.specPerBoss[difficulty] and 
-		   self.data.specPerBoss[difficulty][instanceID] then
-			self.data.specPerBoss[difficulty][instanceID][bossName] = nil
+		if self.data.specPerBoss[difficulty] then
+			self.data.specPerBoss[difficulty][encounterID] = nil
 			return true
 		end
 	else
-		if self.data.specPerBoss.allDifficulties[instanceID] then
-			self.data.specPerBoss.allDifficulties[instanceID][bossName] = nil
-			return true
-		end
+		self.data.specPerBoss.allDifficulties[encounterID] = nil
+		return true
 	end
-	
+
 	return false
 end
 
 -- Get all boss specs (for listing)
 function Database:GetAllBossSpecs()
 	local results = {}
-	
+
 	if self.data.perDifficulty then
-		for difficulty, instances in pairs(self.data.specPerBoss) do
+		for difficulty, encounters in pairs(self.data.specPerBoss) do
 			if difficulty ~= "allDifficulties" then
-				for instanceID, bosses in pairs(instances) do
-					for bossName, specID in pairs(bosses) do
-						table.insert(results, {
-							difficulty = difficulty,
-							instanceID = instanceID,
-							bossName = bossName,
-							specID = specID,
-						})
-					end
+				for encounterID, specID in pairs(encounters) do
+					table.insert(results, {
+						difficulty = difficulty,
+						encounterID = encounterID,
+						specID = specID,
+					})
 				end
 			end
 		end
 	else
-		for instanceID, bosses in pairs(self.data.specPerBoss.allDifficulties) do
-			for bossName, specID in pairs(bosses) do
-				table.insert(results, {
-					difficulty = nil,
-					instanceID = instanceID,
-					bossName = bossName,
-					specID = specID,
-				})
-			end
+		for encounterID, specID in pairs(self.data.specPerBoss.allDifficulties) do
+			table.insert(results, {
+				difficulty = nil,
+				encounterID = encounterID,
+				specID = specID,
+			})
 		end
 	end
-	
+
 	return results
 end
 

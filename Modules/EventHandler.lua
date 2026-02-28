@@ -6,10 +6,8 @@ local _, LSS = ...
 local EventHandler = {}
 LSS.eventHandler = EventHandler
 
-local frame
-
 -- Initialize event handler immediately
-frame = CreateFrame("Frame")
+local frame = CreateFrame("Frame")
 frame:SetScript("OnEvent", function(_, event, ...)
 	EventHandler:OnEvent(event, ...)
 end)
@@ -68,15 +66,21 @@ end
 -- PLAYER_LOGIN event
 function EventHandler:PLAYER_LOGIN()
 	-- Register combat events
-	frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+	--frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+	frame:RegisterEvent("ENCOUNTER_START")
 	frame:RegisterEvent("LOOT_CLOSED")
 	
 	LSS:Debug("Player logged in, combat events registered")
 end
 
 -- PLAYER_TARGET_CHANGED event
-function EventHandler:PLAYER_TARGET_CHANGED()
-	LSS.specManager:OnTargetChanged()
+--function EventHandler:PLAYER_TARGET_CHANGED()
+	--LSS.specManager:OnTargetChanged()
+--end
+
+-- ENCOUNTER_START event
+function EventHandler:ENCOUNTER_START(encounterID, encounterName, difficultyID, groupSize)
+	LSS.specManager:OnEncounterStart(encounterID, difficultyID)
 end
 
 -- LOOT_CLOSED event

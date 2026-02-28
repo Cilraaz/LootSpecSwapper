@@ -61,9 +61,10 @@ commandHandlers.list = function()
 		for _, entry in ipairs(specs) do
 			local diffName = entry.difficulty and LSS.DIFFICULTY_NAMES[entry.difficulty] or "All Difficulties"
 			local specName = LSS.specManager:GetSpecName(entry.specID)
+			-- Resolve a human-readable boss name from the EJ for display only
+			local bossName = EJ_GetEncounterInfo(entry.encounterID) or ("encounterID:" .. entry.encounterID)
 			
-			LSS:Print("%s - Instance %d - %s: |cff00ff00%s|r", 
-				diffName, entry.instanceID, entry.bossName, specName)
+			LSS:Print("%s - %s: |cff00ff00%s|r", diffName, bossName, specName)
 		end
 	end
 	

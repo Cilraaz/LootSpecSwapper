@@ -187,15 +187,35 @@ function SpecManager:SwitchToSpec(specID)
 	end
 end
 
+-- Handle encounter start
+function SpecManager:OnEncounterStart(encounterID, difficultyID)
+	if LSS.db:IsDisabled() then
+		return
+	end
+
+	LSS:Debug("Encounter started: encounterID=%d, difficulty=%d", encounterID, difficultyID)
+
+	local specID = LSS.db:GetBossSpec(encounterID, difficultyID)
+
+	if specID then
+		LSS:Debug("Found spec %d for encounterID %d", specID, encounterID)
+		self:SwitchToSpec(specID)
+		autoSwapActive = true
+		inDefaultSpecAlready = false
+	else
+		LSS:Debug("No spec configured for encounterID: %d", encounterID)
+	end
+end
+
 -- Handle target change
-function SpecManager:OnTargetChanged()
+--[[function SpecManager:OnTargetChanged()
 	if LSS.db:IsDisabled() then
 		return
 	end
 	
 	if not UnitIsDead("target") then
 		local targetName = UnitName("target")
-		if not targetName or issecretvalue(targetName) then
+		if not targetName then
 			return
 		end
 		
@@ -234,7 +254,7 @@ function SpecManager:OnTargetChanged()
 			LSS:Debug("No spec configured for boss: %s", fixedName)
 		end
 	end
-end
+end]]
 
 -- Handle loot closed (restore default spec)
 function SpecManager:OnLootClosed()

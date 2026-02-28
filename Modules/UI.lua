@@ -138,6 +138,13 @@ function UI:SetupMinimizeButton()
 	end)
 end
 
+-- Get the combat encounterID (used by ENCOUNTER_START) from an EJ encounterID.
+function UI:GetCombatEncounterID(ejEncounterID)
+	if not ejEncounterID then return nil end
+	local bossName, _, _, _, _, _, combatEncounterID = EJ_GetEncounterInfo(ejEncounterID)
+	return bossName, combatEncounterID
+end
+
 -- Update button displays
 function UI:UpdateButtons()
 	if not mainFrame:IsVisible() then
@@ -145,15 +152,14 @@ function UI:UpdateButtons()
 	end
 	
 	-- Update boss button
-	local encounterID = EncounterJournal.encounterID
-	local instanceID = EncounterJournal.instanceID
+	local ejEncounterID = EncounterJournal.encounterID
 	
-	if encounterID and instanceID then
-		local bossName = EJ_GetEncounterInfo(encounterID)
+	if ejEncounterID then
+		local bossName, combatEncounterID = self:GetCombatEncounterID(ejEncounterID)
 		
-		if bossName then
+		if bossName and combatEncounterID then
 			local difficulty = EJ_GetDifficulty()
-			local specID = LSS.db:GetBossSpec(instanceID, bossName, difficulty)
+			local specID = LSS.db:GetBossSpec(combatEncounterID, difficulty)
 			
 			bossButton.desc:SetText(string.format("Boss: %s\nLMB: Toggle, RMB: Clear", bossName))
 			self:UpdateButtonIcon(bossButton, specID)
@@ -210,34 +216,34 @@ end
 
 -- Boss button click handler
 function UI:OnBossButtonClick(button)
-	local encounterID = EncounterJournal.encounterID
-	local instanceID = EncounterJournal.instanceID
-	
-	if not encounterID or not instanceID then
+	local ejEncounterID = EncounterJournal.encounterID
+
+	if not ejEncounterID then
 		LSS:Print("Please select a boss first")
 		return
 	end
-	
-	local bossName = EJ_GetEncounterInfo(encounterID)
-	if not bossName then
+
+	local bossName, combatEncounterID = self:GetCombatEncounterID(ejEncounterID)
+	local difficulty = EJ_GetDifficulty()
+
+	if not combatEncounterID then
+		LSS:Print("Could not resolve encounter ID for this boss")
 		return
 	end
 	
-	local difficulty = EJ_GetDifficulty()
-	
 	if button == "RightButton" then
 		-- Clear spec
-		LSS.db:RemoveBossSpec(instanceID, bossName, difficulty)
-		LSS:Print("Cleared spec for |cff00ff00%s|r", bossName)
+		LSS.db:RemoveBossSpec(combatEncounterID, difficulty)
+		LSS:Print("Cleared spec for |cff00ff00%s|r", bossName or ejEncounterID)
 	else
 		-- Cycle through specs
-		local currentSpec = LSS.db:GetBossSpec(instanceID, bossName, difficulty)
+		local currentSpec = LSS.db:GetBossSpec(combatEncounterID, difficulty)
 		local newSpec = LSS.specManager:GetNextSpec(currentSpec)
 		
 		if newSpec then
-			LSS.db:SetBossSpec(instanceID, bossName, newSpec, difficulty)
+			LSS.db:SetBossSpec(combatEncounterID, newSpec, difficulty)
 			local specName = LSS.specManager:GetSpecName(newSpec)
-			LSS:Print("Set |cff00ff00%s|r for %s", specName, bossName)
+			LSS:Print("Set |cff00ff00%s|r for %s", specName, bossName or ejEncounterID)
 		else
 			LSS:Print("No specializations available")
 		end
