@@ -13,7 +13,6 @@
 
 # Core files
 Core.lua
-Data\BossFixes.lua
 Modules\Database.lua
 Modules\SpecManager.lua
 Modules\EventHandler.lua

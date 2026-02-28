@@ -207,55 +207,6 @@ function SpecManager:OnEncounterStart(encounterID, difficultyID)
 	end
 end
 
--- Handle target change
---[[function SpecManager:OnTargetChanged()
-	if LSS.db:IsDisabled() then
-		return
-	end
-	
-	if not UnitIsDead("target") then
-		local targetName = UnitName("target")
-		if not targetName then
-			return
-		end
-		
-		-- Get instance and boss information
-		local mapID = C_Map.GetBestMapForUnit("player")
-		if not mapID then
-			return
-		end
-		
-		local instanceID = EJ_GetInstanceForMap(mapID)
-		if not instanceID then
-			return
-		end
-		
-		-- Apply boss name fixes
-		local originalName = targetName
-		local fixedName = LSS.BossFixes[targetName] or targetName
-		
-		-- Special case for General Kaal in Castle Nathria
-		if targetName == "General Kaal" and instanceID == 1189 then
-			fixedName = targetName
-		end
-		
-		LSS:Debug("Target: %s (Fixed: %s, Instance: %d)", originalName, fixedName, instanceID)
-		
-		-- Get the spec for this boss
-		local difficulty = select(3, GetInstanceInfo())
-		local specID = LSS.db:GetBossSpec(instanceID, fixedName, difficulty)
-		
-		if specID then
-			LSS:Debug("Found spec %d for boss %s", specID, fixedName)
-			self:SwitchToSpec(specID)
-			autoSwapActive = true
-			inDefaultSpecAlready = false
-		else
-			LSS:Debug("No spec configured for boss: %s", fixedName)
-		end
-	end
-end]]
-
 -- Handle loot closed (restore default spec)
 function SpecManager:OnLootClosed()
 	if LSS.db:IsDisabled() then
