@@ -14,40 +14,63 @@ jobs:
     steps:
       # Do the release checkout
       - name: Clone Project
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6
       - name: Get Tag
         id: vars
         run: |
           echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "oldtag=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
-      # Make a zip file for GitHub
+
+      - name: Git Config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync Main
+        run: |
+          git pull --ff-only origin main
+
+      - name: Generate Changelog
+        run: |
+          echo "## Changes" > CHANGELOG.md
+          git log ${{ env.oldtag }}...${{ env.tag }} --pretty=format:"- %h %s" \
+            --invert-grep \
+            --grep="^chore(CHANGELOG):" \
+            --grep="^chore(libs):" \
+            --grep="^chore(release):" \
+            >> CHANGELOG.md
+
+      - name: Commit Changelog
+        run: |
+          git add CHANGELOG.md
+          git commit -m "chore(CHANGELOG): Update changelog for ${{ env.tag }}"
+
+      - name: Create TOC Release Commit
+        run: |
+          git commit --allow-empty -m "chore(release): ${{ env.tag }} release"
+          git push origin main
+
+      - name: Update Tag
+        run: |
+          git tag -fa ${{ env.tag }} -m "Release ${{ env.tag }}"
+          git push origin ${{ env.tag }} --force
+
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
           filename: LootSpecSwapper-${{ env.tag }}.zip
           exclusions: '*.git* *.pkgmeta'
-      # Create a release on GitHub
+
       - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1.11.1
+        uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.ref }}
+          tag: ${{ env.tag }}
           name: LootSpecSwapper
-          body: |
-            Changes: https://github.com/Cilraaz/LootSpecSwapper/compare/${{ env.oldtag }}...${{ env.tag }}
+          bodyFile: CHANGELOG.md
+          artifacts: LootSpecSwapper-${{ env.tag }}.zip
           draft: false
           prerelease: false
-      # Upload the zip to the GitHub release
-      - name: Upload Zip
-        id: upload-zip
-        uses: shogo82148/actions-upload-release-asset@v1.6.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./LootSpecSwapper-${{ env.tag }}.zip
-          asset_name: LootSpecSwapper-${{ env.tag }}.zip
-          asset_content_type: application/zip
+
       # Use the BigWigs packager for Wago output
       - name: Package and Release to Wago
         uses: BigWigsMods/packager@master
